@@ -13,10 +13,12 @@ public class DatabaseProvider {
             synchronized (DatabaseProvider.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(
-                            context.getApplicationContext(),
-                            AppDatabase.class,
-                            "cubbards.db"
-                    ).build();
+                                    context.getApplicationContext(),
+                                    AppDatabase.class,
+                                    "cubbards.db"
+                            )
+                            .addMigrations(AppDatabase.MIGRATION_1_2)
+                            .build();
                 }
             }
         }
