@@ -21,10 +21,14 @@ public class Ingredient {
 
     private Long createdAt;
 
+    // NEW: manual "frequently replaced" pin
+    private boolean isFrequent;
+
     public Ingredient(String name, String nameNormalized, Long createdAt) {
         this.name = name;
         this.nameNormalized = nameNormalized;
         this.createdAt = createdAt;
+        this.isFrequent = false; // default
     }
 
     // --- Getters and setters ---
@@ -47,5 +51,14 @@ public class Ingredient {
 
     public Long getCreatedAt() {
         return createdAt;
+    }
+
+    // NEW
+    public boolean isFrequent() {
+        return isFrequent;
+    }
+
+    public void setFrequent(boolean frequent) {
+        isFrequent = frequent;
     }
 }

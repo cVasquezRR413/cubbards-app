@@ -35,4 +35,46 @@ public interface PantryItemDao {
                     "ORDER BY i.name ASC"
     )
     List<PantryRow> getPantryRows();
+
+    // Milestone 3: "Low" items (hardcoded threshold for now)
+    @Query(
+            "SELECT pi.id AS pantryItemId, " +
+                    "pi.ingredientId AS ingredientId, " +
+                    "i.name AS ingredientName, " +
+                    "pi.quantity AS quantity, " +
+                    "pi.unit AS unit " +
+                    "FROM pantry_items pi " +
+                    "JOIN ingredients i ON i.ingredientId = pi.ingredientId " +
+                    "WHERE pi.quantity <= 1 " +
+                    "ORDER BY i.name ASC"
+    )
+    List<PantryRow> getLowItems();
+
+    // Milestone 3: "Expiring soon" (within cutoffMillis)
+    @Query(
+            "SELECT pi.id AS pantryItemId, " +
+                    "pi.ingredientId AS ingredientId, " +
+                    "i.name AS ingredientName, " +
+                    "pi.quantity AS quantity, " +
+                    "pi.unit AS unit " +
+                    "FROM pantry_items pi " +
+                    "JOIN ingredients i ON i.ingredientId = pi.ingredientId " +
+                    "WHERE pi.expiresAt IS NOT NULL AND pi.expiresAt <= :cutoffMillis " +
+                    "ORDER BY pi.expiresAt ASC"
+    )
+    List<PantryRow> getExpiringSoon(long cutoffMillis);
+
+    // Milestone 3: "Frequently replaced" (manual pin via Ingredient.isFrequent)
+    @Query(
+            "SELECT pi.id AS pantryItemId, " +
+                    "pi.ingredientId AS ingredientId, " +
+                    "i.name AS ingredientName, " +
+                    "pi.quantity AS quantity, " +
+                    "pi.unit AS unit " +
+                    "FROM pantry_items pi " +
+                    "JOIN ingredients i ON i.ingredientId = pi.ingredientId " +
+                    "WHERE i.isFrequent = 1 " +
+                    "ORDER BY i.name ASC"
+    )
+    List<PantryRow> getFrequentItems();
 }
