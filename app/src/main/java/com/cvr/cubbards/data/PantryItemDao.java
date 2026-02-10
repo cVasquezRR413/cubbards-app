@@ -77,4 +77,8 @@ public interface PantryItemDao {
                     "ORDER BY i.name ASC"
     )
     List<PantryRow> getFrequentItems();
+
+    @Query("SELECT * FROM pantry_items WHERE ingredientId = :ingredientId LIMIT 1")
+    PantryItem getByIngredientId(long ingredientId);
+
 }

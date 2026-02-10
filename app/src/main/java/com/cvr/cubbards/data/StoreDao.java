@@ -25,4 +25,8 @@ public interface StoreDao {
 
     @Query("SELECT * FROM stores WHERE storeId = :id LIMIT 1")
     Store getById(long id);
+
+    @Query("SELECT * FROM stores WHERE name = :name LIMIT 1")
+    Store getByName(String name);
+
 }

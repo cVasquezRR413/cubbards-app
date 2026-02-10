@@ -1,3 +1,4 @@
+// GroceryListDao.java (replace getAll() with this version)
 package com.cvr.cubbards.data;
 
 import androidx.room.Dao;
@@ -17,7 +18,13 @@ public interface GroceryListDao {
     int removeByIngredientId(long ingredientId);
 
     @Query(
-            "SELECT gli.id AS groceryItemId, gli.ingredientId AS ingredientId, i.name AS ingredientName, gli.addedAt AS addedAt " +
+            "SELECT " +
+                    "gli.id AS groceryItemId, " +
+                    "gli.ingredientId AS ingredientId, " +
+                    "i.name AS ingredientName, " +
+                    "gli.addedAt AS addedAt, " +
+                    "gli.quantity AS quantity, " +
+                    "gli.unit AS unit " +
                     "FROM grocery_list_items gli " +
                     "JOIN ingredients i ON i.ingredientId = gli.ingredientId " +
                     "ORDER BY gli.addedAt DESC"

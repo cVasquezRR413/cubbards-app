@@ -13,7 +13,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
                 PantryItem.class,
                 GroceryListItem.class
         },
-        version = 5,
+        version = 6,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -73,13 +73,28 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
-    // NEW: add isFrequent column to ingredients
+    // add isFrequent column to ingredients
     public static final Migration MIGRATION_4_5 = new Migration(4, 5) {
         @Override
         public void migrate(SupportSQLiteDatabase db) {
             db.execSQL(
                     "ALTER TABLE `ingredients` " +
                             "ADD COLUMN `isFrequent` INTEGER NOT NULL DEFAULT 0"
+            );
+        }
+    };
+
+    // NEW: add quantity + unit columns to grocery_list_items
+    public static final Migration MIGRATION_5_6 = new Migration(5, 6) {
+        @Override
+        public void migrate(SupportSQLiteDatabase db) {
+            db.execSQL(
+                    "ALTER TABLE `grocery_list_items` " +
+                            "ADD COLUMN `quantity` REAL NOT NULL DEFAULT 0"
+            );
+            db.execSQL(
+                    "ALTER TABLE `grocery_list_items` " +
+                            "ADD COLUMN `unit` TEXT"
             );
         }
     };

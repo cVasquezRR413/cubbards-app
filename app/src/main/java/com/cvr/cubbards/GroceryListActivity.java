@@ -16,6 +16,7 @@ import com.cvr.cubbards.data.AppDatabase;
 import com.cvr.cubbards.data.DatabaseProvider;
 import com.cvr.cubbards.data.GroceryListDao;
 import com.cvr.cubbards.data.GroceryRow;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
@@ -42,10 +43,22 @@ public class GroceryListActivity extends AppCompatActivity {
         tvTitle = findViewById(R.id.tvTitle);
         groceryContainer = findViewById(R.id.groceryContainer);
 
+        FloatingActionButton fab = findViewById(R.id.fabAddItem);
+        fab.setOnClickListener(v -> {
+            AddItemBottomSheet sheet = new AddItemBottomSheet();
+            sheet.show(getSupportFragmentManager(), "AddItemBottomSheet");
+        });
+
         refreshGroceryUI();
     }
 
-    private void refreshGroceryUI() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshGroceryUI();
+    }
+
+    public void refreshGroceryUI() {
         new Thread(() -> {
             AppDatabase db = DatabaseProvider.getDatabase(this);
             GroceryListDao groceryDao = db.groceryListDao();
@@ -66,21 +79,32 @@ public class GroceryListActivity extends AppCompatActivity {
                 for (GroceryRow row : rows) {
                     Button b = new Button(this);
                     b.setAllCaps(false);
-                    b.setText(row.ingredientName + "  (tap to remove)");
 
-                    b.setOnClickListener(v -> {
-                        // Do DB delete on background thread
-                        new Thread(() -> {
-                            AppDatabase db2 = DatabaseProvider.getDatabase(this);
-                            GroceryListDao dao2 = db2.groceryListDao();
+                    String details = "";
+                    if (row.quantity > 0) {
+                        String q = (row.quantity == Math.rint(row.quantity))
+                                ? String.valueOf((long) row.quantity)
+                                : String.valueOf(row.quantity);
 
-                            int removed = dao2.removeByIngredientId(row.ingredientId);
-                            Log.d(TAG, "Removed " + row.ingredientName + " removed=" + removed);
+                        if (row.unit != null && !row.unit.trim().isEmpty()) {
+                            details = " — " + q + " " + row.unit;
+                        } else {
+                            details = " — " + q;
+                        }
+                    }
+                    b.setText(row.ingredientName + details + "  (tap to remove)");
 
-                            // Refresh screen
-                            refreshGroceryUI();
-                        }).start();
-                    });
+
+
+                    b.setOnClickListener(v -> new Thread(() -> {
+                        AppDatabase db2 = DatabaseProvider.getDatabase(this);
+                        GroceryListDao dao2 = db2.groceryListDao();
+
+                        int removed = dao2.removeByIngredientId(row.ingredientId);
+                        Log.d(TAG, "Removed " + row.ingredientName + " removed=" + removed);
+
+                        refreshGroceryUI();
+                    }).start());
 
                     groceryContainer.addView(b);
                 }

@@ -4,4 +4,12 @@
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
     </style>
+
+    <style name="Theme.Cubbards" parent="Base.Theme.Cubbards" />
+
+    <!-- Same style in night resources -->
+    <style name="FabCircleShape">
+        <item name="cornerSize">28dp</item>
+    </style>
+
 </resources>

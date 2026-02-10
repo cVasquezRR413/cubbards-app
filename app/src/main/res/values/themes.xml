@@ -6,4 +6,10 @@
     </style>
 
     <style name="Theme.Cubbards" parent="Base.Theme.Cubbards" />
+
+    <!-- Simple name: avoids AAPT dot-parsing issues -->
+    <style name="FabCircleShape">
+        <item name="cornerSize">28dp</item>
+    </style>
+
 </resources>

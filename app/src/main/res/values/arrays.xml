@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="unit_options">
+        <item>(none)</item>
+        <item>oz</item>
+        <item>lb</item>
+        <item>g</item>
+        <item>bags</item>
+        <item>boxes</item>
+        <item>cans</item>
+    </string-array>
+</resources>

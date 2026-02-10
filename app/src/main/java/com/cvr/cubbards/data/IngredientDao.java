@@ -33,4 +33,8 @@ public interface IngredientDao {
 
     @Query("SELECT * FROM ingredients WHERE isFrequent = 1 ORDER BY name ASC")
     List<Ingredient> getFrequentIngredients();
+
+    @Query("SELECT * FROM ingredients WHERE nameNormalized = :nameNormalized LIMIT 1")
+    Ingredient getByNameNormalized(String nameNormalized);
+
 }
