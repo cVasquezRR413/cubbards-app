@@ -19,13 +19,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Container we will dynamically fill with buttons -->
-    <LinearLayout
-        android:id="@+id/groceryContainer"
+    <!-- RecyclerView (replaces groceryContainer LinearLayout) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/groceryRecycler"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:orientation="vertical"
-        android:padding="16dp"
+        android:clipToPadding="false"
+        android:paddingBottom="88dp"
         app:layout_constraintTop_toBottomOf="@id/tvTitle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

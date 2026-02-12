@@ -45,6 +45,34 @@
             android:layout_marginStart="12dp" />
     </LinearLayout>
 
+    <!-- Store selector -->
+    <Spinner
+        android:id="@+id/spStore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp" />
+
+    <!-- New store fields (hidden unless user picks "New store…") -->
+    <EditText
+        android:id="@+id/etStoreName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Store name"
+        android:inputType="textPersonName"
+        android:padding="12dp"
+        android:layout_marginTop="12dp"
+        android:visibility="gone"/>
+
+    <EditText
+        android:id="@+id/etStoreLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Location (optional)"
+        android:inputType="textPersonName"
+        android:padding="12dp"
+        android:layout_marginTop="12dp"
+        android:visibility="gone"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

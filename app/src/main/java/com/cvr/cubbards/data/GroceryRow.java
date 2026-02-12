@@ -1,4 +1,3 @@
-// GroceryRow.java (add these fields)
 package com.cvr.cubbards.data;
 
 public class GroceryRow {
@@ -7,7 +6,11 @@ public class GroceryRow {
     public String ingredientName;
     public long addedAt;
 
-    // NEW
     public double quantity;
     public String unit;
+
+    // NEW: optional store info for grouping
+    public Long storeId;
+    public String storeName;
+    public String storeLocation;
 }
