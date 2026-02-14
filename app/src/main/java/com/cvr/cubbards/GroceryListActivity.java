@@ -3,7 +3,6 @@ package com.cvr.cubbards;
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
@@ -68,6 +67,17 @@ public class GroceryListActivity extends AppCompatActivity {
             public void onDeleteClicked(GroceryRow row) {
                 deleteRow(row);
             }
+
+            @Override
+            public void onEditClicked(GroceryRow row) {
+                closeOpenedRow();
+                Log.d(TAG, "EDIT clicked: " + row.ingredientName
+                        + " groceryItemId=" + row.groceryItemId);
+
+                // NEW: open bottom sheet in edit mode (prefilled)
+                AddItemBottomSheet sheet = AddItemBottomSheet.newEditInstance(row);
+                sheet.show(getSupportFragmentManager(), "EditItemBottomSheet");
+            }
         });
 
         adapter.setRevealWidthPx(deleteBtnWidthPx);
@@ -76,9 +86,6 @@ public class GroceryListActivity extends AppCompatActivity {
         if (groceryRecycler.getItemAnimator() instanceof SimpleItemAnimator) {
             ((SimpleItemAnimator) groceryRecycler.getItemAnimator()).setSupportsChangeAnimations(false);
         }
-
-        // Keep OFF while stabilizing swipe
-        // attachRevealTapHandler();
 
         attachSwipeRevealDelete();
 
@@ -149,16 +156,13 @@ public class GroceryListActivity extends AppCompatActivity {
                         return false;
                     }
 
-                    // --- CRITICAL: prevent fast-flick from triggering "full swipe" ---
                     @Override
                     public float getSwipeThreshold(RecyclerView.ViewHolder viewHolder) {
-                        // Distance threshold: make it impossible to "commit" a swipe
                         return 10f;
                     }
 
                     @Override
                     public float getSwipeEscapeVelocity(float defaultValue) {
-                        // Velocity threshold: make it effectively impossible to escape-swipe
                         return Float.MAX_VALUE;
                     }
 
@@ -169,8 +173,6 @@ public class GroceryListActivity extends AppCompatActivity {
 
                     @Override
                     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                        // Required by SimpleCallback.
-                        // If this EVER triggers, treat it as "close" and restore immediately.
                         int pos = viewHolder.getAdapterPosition();
                         Log.d(TAG, "onSwiped fired pos=" + pos + " dir=" + direction + " -> FORCING CLOSE");
 
@@ -183,7 +185,6 @@ public class GroceryListActivity extends AppCompatActivity {
                                 fg.setTag(0f);
                             }
 
-                            // restore the viewholder state
                             adapter.notifyItemChanged(pos);
                         }
                     }
@@ -212,7 +213,6 @@ public class GroceryListActivity extends AppCompatActivity {
                                 + " startedOpen=" + startedOpen);
 
                         if (startedOpen) {
-                            // close if pulled at least halfway toward 0
                             if (tx >= -deleteBtnWidthPx * 0.5f) {
                                 Log.d(TAG, "DECISION: CLOSE (startedOpen)");
                                 adapter.setOpenedPos(RecyclerView.NO_POSITION);
@@ -225,7 +225,6 @@ public class GroceryListActivity extends AppCompatActivity {
                                 fg.setTag(-deleteBtnWidthPx);
                             }
                         } else {
-                            // open if pulled left far enough
                             if (tx <= -deleteBtnWidthPx * 0.35f) {
                                 Log.d(TAG, "DECISION: OPEN (startedClosed)");
                                 adapter.setOpenedPos(pos);

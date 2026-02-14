@@ -21,6 +21,7 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public interface Listener {
         void onItemClicked(GroceryRow row);
         void onDeleteClicked(GroceryRow row);
+        void onEditClicked(GroceryRow row); // NEW
     }
 
     // --- UI rows (store headers + items) ---
@@ -203,6 +204,12 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             View del = itemView.findViewById(R.id.btnDelete);
             if (del != null) {
                 del.setOnClickListener(v -> listener.onDeleteClicked(row));
+            }
+
+            // NEW: edit (pencil) click
+            View edit = itemView.findViewById(R.id.btnEdit);
+            if (edit != null) {
+                edit.setOnClickListener(v -> listener.onEditClicked(row));
             }
         }
     }

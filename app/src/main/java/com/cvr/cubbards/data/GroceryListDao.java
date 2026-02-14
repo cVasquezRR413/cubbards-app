@@ -16,6 +16,10 @@ public interface GroceryListDao {
     @Query("DELETE FROM grocery_list_items WHERE ingredientId = :ingredientId")
     int removeByIngredientId(long ingredientId);
 
+    // NEW: update an existing grocery list row by its primary key (id)
+    @Query("UPDATE grocery_list_items SET quantity = :quantity, unit = :unit, storeId = :storeId WHERE id = :groceryItemId")
+    int updateItem(long groceryItemId, double quantity, String unit, Long storeId);
+
     @Query(
             "SELECT " +
                     "gli.id AS groceryItemId, " +

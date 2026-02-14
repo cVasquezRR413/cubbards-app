@@ -18,6 +18,7 @@ import com.cvr.cubbards.data.AppDatabase;
 import com.cvr.cubbards.data.DatabaseProvider;
 import com.cvr.cubbards.data.GroceryListDao;
 import com.cvr.cubbards.data.GroceryListItem;
+import com.cvr.cubbards.data.GroceryRow;
 import com.cvr.cubbards.data.Ingredient;
 import com.cvr.cubbards.data.IngredientDao;
 import com.cvr.cubbards.data.Store;
@@ -32,6 +33,14 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
     private static final String STORE_NONE = "(none)";
     private static final String STORE_NEW = "New store…";
 
+    // ---- edit-mode args ----
+    private static final String ARG_IS_EDIT = "is_edit";
+    private static final String ARG_GROCERY_ITEM_ID = "grocery_item_id";
+    private static final String ARG_INGREDIENT_NAME = "ingredient_name";
+    private static final String ARG_QUANTITY = "quantity";
+    private static final String ARG_UNIT = "unit";
+    private static final String ARG_STORE_ID = "store_id";
+
     // Keep the real Store objects aligned with the spinner entries
     // Index meanings:
     // 0 -> (none)
@@ -39,6 +48,29 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
     // 2+ -> stores.get(i-2)
     private List<Store> stores = new ArrayList<>();
     private ArrayAdapter<String> storeAdapter;
+
+    // cached edit info (if applicable)
+    private boolean isEdit = false;
+    private long editGroceryItemId = -1L;
+    private String editIngredientName = null;
+    private double editQty = 0.0;
+    private String editUnit = null;
+    private Long editStoreId = null;
+
+    public static AddItemBottomSheet newEditInstance(GroceryRow row) {
+        AddItemBottomSheet sheet = new AddItemBottomSheet();
+        Bundle b = new Bundle();
+        b.putBoolean(ARG_IS_EDIT, true);
+        b.putLong(ARG_GROCERY_ITEM_ID, row.groceryItemId);
+        b.putString(ARG_INGREDIENT_NAME, row.ingredientName);
+        b.putDouble(ARG_QUANTITY, row.quantity);
+        b.putString(ARG_UNIT, row.unit);
+        if (row.storeId != null) {
+            b.putLong(ARG_STORE_ID, row.storeId);
+        }
+        sheet.setArguments(b);
+        return sheet;
+    }
 
     @Nullable
     @Override
@@ -54,6 +86,22 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // ---- read args ----
+        Bundle args = getArguments();
+        isEdit = args != null && args.getBoolean(ARG_IS_EDIT, false);
+
+        if (isEdit && args != null) {
+            editGroceryItemId = args.getLong(ARG_GROCERY_ITEM_ID, -1L);
+            editIngredientName = args.getString(ARG_INGREDIENT_NAME, null);
+            editQty = args.getDouble(ARG_QUANTITY, 0.0);
+            editUnit = args.getString(ARG_UNIT, null);
+            if (args.containsKey(ARG_STORE_ID)) {
+                editStoreId = args.getLong(ARG_STORE_ID);
+            } else {
+                editStoreId = null;
+            }
+        }
+
         EditText etName = view.findViewById(R.id.etName);
         EditText etQuantity = view.findViewById(R.id.etQuantity);
 
@@ -66,6 +114,22 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         Button btnCancel = view.findViewById(R.id.btnCancel);
         Button btnSave = view.findViewById(R.id.btnSave);
 
+        // ---- Prefill (edit mode) ----
+        if (isEdit) {
+            if (editIngredientName != null) etName.setText(editIngredientName);
+
+            // name editing is NOT supported by the current DAO update (it updates qty/unit/store only)
+            etName.setEnabled(false);
+            etName.setFocusable(false);
+
+            if (editQty > 0) {
+                // keep it simple; your adapter already formats nicely for display
+                etQuantity.setText(String.valueOf(editQty == Math.rint(editQty) ? (long) editQty : editQty));
+            } else {
+                etQuantity.setText("");
+            }
+        }
+
         // Units spinner
         ArrayAdapter<CharSequence> unitAdapter = ArrayAdapter.createFromResource(
                 requireContext(),
@@ -75,6 +139,19 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         unitAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spUnit.setAdapter(unitAdapter);
         spUnit.setSelection(0);
+
+        // If edit, set unit selection after adapter is set
+        if (isEdit && editUnit != null) {
+            int unitIndex = 0;
+            for (int i = 0; i < unitAdapter.getCount(); i++) {
+                CharSequence v = unitAdapter.getItem(i);
+                if (v != null && editUnit.trim().equalsIgnoreCase(v.toString().trim())) {
+                    unitIndex = i;
+                    break;
+                }
+            }
+            spUnit.setSelection(unitIndex);
+        }
 
         // Store spinner (starts with placeholders; we’ll populate after DB read)
         storeAdapter = new ArrayAdapter<>(
@@ -124,15 +201,32 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                 storeAdapter.clear();
                 storeAdapter.addAll(labels);
                 storeAdapter.notifyDataSetChanged();
-                spStore.setSelection(0);
+
+                // If edit, select the existing store in the spinner (if present)
+                if (isEdit) {
+                    int sel = 0; // none by default
+                    if (editStoreId != null) {
+                        for (int i = 0; i < stores.size(); i++) {
+                            if (stores.get(i).getStoreId() == editStoreId) {
+                                sel = i + 2; // offset for (none) + New store…
+                                break;
+                            }
+                        }
+                    }
+                    spStore.setSelection(sel);
+                } else {
+                    spStore.setSelection(0);
+                }
             });
         }).start();
 
         btnCancel.setOnClickListener(v -> dismiss());
 
         btnSave.setOnClickListener(v -> {
+
+            // name is required for add-mode only
             String rawName = etName.getText() == null ? "" : etName.getText().toString().trim();
-            if (TextUtils.isEmpty(rawName)) return;
+            if (!isEdit && TextUtils.isEmpty(rawName)) return;
 
             String qtyRaw = etQuantity.getText() == null ? "" : etQuantity.getText().toString().trim();
             double qty = 0.0;
@@ -176,7 +270,6 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                 selectedStoreId = (idx >= 0 && idx < stores.size()) ? stores.get(idx).getStoreId() : null;
             }
 
-            String normalized = rawName.toLowerCase().trim();
             final double finalQty = qty;
             final String finalUnit = unit;
 
@@ -186,17 +279,9 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                 GroceryListDao groceryDao = db.groceryListDao();
                 StoreDao storeDao = db.storeDao();
 
-                // ingredient
-                long ingredientId = findIngredientIdByNormalized(ingredientDao, normalized);
-                if (ingredientId == -1L) {
-                    Ingredient ing = new Ingredient(rawName, normalized, System.currentTimeMillis());
-                    ingredientId = ingredientDao.insert(ing);
-                }
-
                 // store (optional)
                 Long storeIdToUse = selectedStoreId;
                 if (wantsNewStore) {
-                    // avoid duplicates by name+location
                     Store existing = storeDao.getByNameAndLocation(newStoreName, newStoreLocation);
                     if (existing != null) {
                         storeIdToUse = existing.getStoreId();
@@ -207,13 +292,29 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                     }
                 }
 
-                groceryDao.insert(new GroceryListItem(
-                        ingredientId,
-                        storeIdToUse,
-                        System.currentTimeMillis(),
-                        finalQty,
-                        finalUnit
-                ));
+                if (isEdit) {
+                    // EDIT MODE: update existing grocery_list_items row
+                    if (editGroceryItemId > 0) {
+                        groceryDao.updateItem(editGroceryItemId, finalQty, finalUnit, storeIdToUse);
+                    }
+                } else {
+                    // ADD MODE: ingredient
+                    String normalized = rawName.toLowerCase().trim();
+
+                    long ingredientId = findIngredientIdByNormalized(ingredientDao, normalized);
+                    if (ingredientId == -1L) {
+                        Ingredient ing = new Ingredient(rawName, normalized, System.currentTimeMillis());
+                        ingredientId = ingredientDao.insert(ing);
+                    }
+
+                    groceryDao.insert(new GroceryListItem(
+                            ingredientId,
+                            storeIdToUse,
+                            System.currentTimeMillis(),
+                            finalQty,
+                            finalUnit
+                    ));
+                }
 
                 requireActivity().runOnUiThread(() -> {
                     if (requireActivity() instanceof GroceryListActivity) {
