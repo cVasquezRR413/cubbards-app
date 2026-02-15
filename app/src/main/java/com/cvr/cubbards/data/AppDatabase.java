@@ -13,7 +13,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
                 PantryItem.class,
                 GroceryListItem.class
         },
-        version = 8,
+        version = 9,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -114,7 +114,6 @@ public abstract class AppDatabase extends RoomDatabase {
         @Override
         public void migrate(SupportSQLiteDatabase db) {
 
-            // Create new table with full schema + foreign keys
             db.execSQL(
                     "CREATE TABLE IF NOT EXISTS `grocery_list_items_new` (" +
                             "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
@@ -130,7 +129,6 @@ public abstract class AppDatabase extends RoomDatabase {
                             ")"
             );
 
-            // Copy existing data (storeId did NOT exist before v8, so use NULL)
             db.execSQL(
                     "INSERT INTO `grocery_list_items_new` " +
                             "(`id`, `ingredientId`, `storeId`, `addedAt`, `quantity`, `unit`) " +
@@ -138,14 +136,67 @@ public abstract class AppDatabase extends RoomDatabase {
                             "FROM `grocery_list_items`"
             );
 
-            // Replace old table
             db.execSQL("DROP TABLE `grocery_list_items`");
             db.execSQL("ALTER TABLE `grocery_list_items_new` RENAME TO `grocery_list_items`");
 
-            // Recreate indexes
             db.execSQL(
                     "CREATE UNIQUE INDEX IF NOT EXISTS `index_grocery_list_items_ingredientId` " +
                             "ON `grocery_list_items` (`ingredientId`)"
+            );
+
+            db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_grocery_list_items_storeId` " +
+                            "ON `grocery_list_items` (`storeId`)"
+            );
+        }
+    };
+
+    // 8 → 9 : DECOUPLE grocery list from ingredients (table rebuild required)
+    public static final Migration MIGRATION_8_9 = new Migration(8, 9) {
+        @Override
+        public void migrate(SupportSQLiteDatabase db) {
+
+            // New schema matches GroceryListItem:
+            // id, name, nameNormalized, storeId, addedAt, quantity, unit
+            db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `grocery_list_items_new` (" +
+                            "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                            "`name` TEXT, " +
+                            "`nameNormalized` TEXT, " +
+                            "`storeId` INTEGER, " +
+                            "`addedAt` INTEGER NOT NULL, " +
+                            "`quantity` REAL NOT NULL DEFAULT 0, " +
+                            "`unit` TEXT, " +
+                            "FOREIGN KEY(`storeId`) REFERENCES `stores`(`storeId`) " +
+                            "ON UPDATE NO ACTION ON DELETE SET NULL" +
+                            ")"
+            );
+
+            // Copy existing rows:
+            // old table has ingredientId -> pull name/nameNormalized from ingredients.
+            // If ingredient is missing, fall back to '(deleted)'.
+            db.execSQL(
+                    "INSERT INTO `grocery_list_items_new` " +
+                            "(`id`, `name`, `nameNormalized`, `storeId`, `addedAt`, `quantity`, `unit`) " +
+                            "SELECT " +
+                            "gli.`id`, " +
+                            "COALESCE(i.`name`, '(deleted)') AS `name`, " +
+                            "COALESCE(i.`nameNormalized`, LOWER(COALESCE(i.`name`, '(deleted)'))) AS `nameNormalized`, " +
+                            "gli.`storeId`, " +
+                            "gli.`addedAt`, " +
+                            "gli.`quantity`, " +
+                            "gli.`unit` " +
+                            "FROM `grocery_list_items` gli " +
+                            "LEFT JOIN `ingredients` i ON i.`ingredientId` = gli.`ingredientId`"
+            );
+
+            db.execSQL("DROP TABLE `grocery_list_items`");
+            db.execSQL("ALTER TABLE `grocery_list_items_new` RENAME TO `grocery_list_items`");
+
+            // Indexes must match your @Entity indices:
+            db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_grocery_list_items_nameNormalized` " +
+                            "ON `grocery_list_items` (`nameNormalized`)"
             );
             db.execSQL(
                     "CREATE INDEX IF NOT EXISTS `index_grocery_list_items_storeId` " +

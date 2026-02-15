@@ -13,18 +13,32 @@ public interface GroceryListDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     long insert(GroceryListItem item);
 
-    @Query("DELETE FROM grocery_list_items WHERE ingredientId = :ingredientId")
-    int removeByIngredientId(long ingredientId);
+    // delete by grocery row id
+    @Query("DELETE FROM grocery_list_items WHERE id = :groceryItemId")
+    int deleteById(long groceryItemId);
 
-    // NEW: update an existing grocery list row by its primary key (id)
-    @Query("UPDATE grocery_list_items SET quantity = :quantity, unit = :unit, storeId = :storeId WHERE id = :groceryItemId")
-    int updateItem(long groceryItemId, double quantity, String unit, Long storeId);
+    // full edit support (including name)
+    @Query(
+            "UPDATE grocery_list_items SET " +
+                    "name = :name, " +
+                    "nameNormalized = :nameNormalized, " +
+                    "quantity = :quantity, " +
+                    "unit = :unit, " +
+                    "storeId = :storeId " +
+                    "WHERE id = :groceryItemId"
+    )
+    int updateItem(long groceryItemId,
+                   String name,
+                   String nameNormalized,
+                   double quantity,
+                   String unit,
+                   Long storeId);
 
     @Query(
             "SELECT " +
                     "gli.id AS groceryItemId, " +
-                    "gli.ingredientId AS ingredientId, " +
-                    "i.name AS ingredientName, " +
+                    "gli.name AS name, " +
+                    "gli.nameNormalized AS nameNormalized, " +
                     "gli.addedAt AS addedAt, " +
                     "gli.quantity AS quantity, " +
                     "gli.unit AS unit, " +
@@ -32,10 +46,9 @@ public interface GroceryListDao {
                     "s.name AS storeName, " +
                     "s.location AS storeLocation " +
                     "FROM grocery_list_items gli " +
-                    "JOIN ingredients i ON i.ingredientId = gli.ingredientId " +
                     "LEFT JOIN stores s ON s.storeId = gli.storeId " +
                     "ORDER BY " +
-                    "CASE WHEN s.name IS NULL THEN 1 ELSE 0 END, " + // no-store section last
+                    "CASE WHEN s.name IS NULL THEN 1 ELSE 0 END, " +
                     "s.name ASC, " +
                     "s.location ASC, " +
                     "gli.addedAt DESC"

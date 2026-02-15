@@ -71,7 +71,7 @@ public class GroceryListActivity extends AppCompatActivity {
             @Override
             public void onEditClicked(GroceryRow row) {
                 closeOpenedRow();
-                Log.d(TAG, "EDIT clicked: " + row.ingredientName
+                Log.d(TAG, "EDIT clicked: " + row.name
                         + " groceryItemId=" + row.groceryItemId);
 
                 // NEW: open bottom sheet in edit mode (prefilled)
@@ -109,8 +109,8 @@ public class GroceryListActivity extends AppCompatActivity {
             AppDatabase db2 = DatabaseProvider.getDatabase(GroceryListActivity.this);
             GroceryListDao dao2 = db2.groceryListDao();
 
-            int removed = dao2.removeByIngredientId(row.ingredientId);
-            Log.d(TAG, "Delete: " + row.ingredientName + " removed=" + removed);
+            int removed = dao2.deleteById(row.groceryItemId);
+            Log.d(TAG, "Delete: " + row.name + " removed=" + removed);
 
             runOnUiThread(() -> {
                 adapter.setOpenedPos(RecyclerView.NO_POSITION);

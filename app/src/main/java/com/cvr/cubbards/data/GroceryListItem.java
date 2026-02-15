@@ -10,13 +10,6 @@ import androidx.room.PrimaryKey;
         tableName = "grocery_list_items",
         foreignKeys = {
                 @ForeignKey(
-                        entity = Ingredient.class,
-                        parentColumns = "ingredientId",
-                        childColumns = "ingredientId",
-                        onDelete = ForeignKey.CASCADE,
-                        onUpdate = ForeignKey.NO_ACTION
-                ),
-                @ForeignKey(
                         entity = Store.class,
                         parentColumns = "storeId",
                         childColumns = "storeId",
@@ -25,7 +18,7 @@ import androidx.room.PrimaryKey;
                 )
         },
         indices = {
-                @Index(value = {"ingredientId"}, unique = true),
+                @Index(value = {"nameNormalized"}),
                 @Index(value = {"storeId"})
         }
 )
@@ -34,9 +27,11 @@ public class GroceryListItem {
     @PrimaryKey(autoGenerate = true)
     public long id;
 
-    public long ingredientId;
+    // 🆕 Grocery owns its own name
+    public String name;
+    public String nameNormalized;
 
-    // NEW: optional store link
+    // Optional store link
     public Long storeId;
 
     public long addedAt;
@@ -45,24 +40,28 @@ public class GroceryListItem {
 
     public String unit;
 
-    // Room constructor (use this one going forward).
-    public GroceryListItem(long ingredientId, Long storeId, long addedAt, double quantity, String unit) {
-        this.ingredientId = ingredientId;
+    // Primary constructor
+    public GroceryListItem(String name,
+                           String nameNormalized,
+                           Long storeId,
+                           long addedAt,
+                           double quantity,
+                           String unit) {
+        this.name = name;
+        this.nameNormalized = nameNormalized;
         this.storeId = storeId;
         this.addedAt = addedAt;
         this.quantity = quantity;
         this.unit = unit;
     }
 
-    // Backward-compatible convenience constructor for existing call sites
+    // Convenience constructor (no store)
     @Ignore
-    public GroceryListItem(long ingredientId, long addedAt, double quantity, String unit) {
-        this(ingredientId, null, addedAt, quantity, unit);
-    }
-
-    // Older convenience constructor
-    @Ignore
-    public GroceryListItem(long ingredientId, long addedAt) {
-        this(ingredientId, null, addedAt, 0.0, null);
+    public GroceryListItem(String name,
+                           String nameNormalized,
+                           long addedAt,
+                           double quantity,
+                           String unit) {
+        this(name, nameNormalized, null, addedAt, quantity, unit);
     }
 }

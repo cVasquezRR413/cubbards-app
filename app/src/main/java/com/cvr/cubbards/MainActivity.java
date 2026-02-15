@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvPantry;
     private LinearLayout lowContainer;
     private LinearLayout expiringContainer;
-    private LinearLayout frequentContainer; // NEW
+    private LinearLayout frequentContainer;
 
     private Button btnAddMilk;
     private Button btnUseMilk;
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         tvPantry = findViewById(R.id.tvPantry);
         lowContainer = findViewById(R.id.lowContainer);
         expiringContainer = findViewById(R.id.expiringContainer);
-        frequentContainer = findViewById(R.id.frequentContainer); // NEW
+        frequentContainer = findViewById(R.id.frequentContainer);
 
         btnAddMilk = findViewById(R.id.btnAddMilk);
         btnUseMilk = findViewById(R.id.btnUseMilk);
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         refreshPantryText();
         refreshLowUI();
         refreshExpiringUI();
-        refreshFrequentUI(); // NEW
+        refreshFrequentUI();
 
         btnOpenGrocery.setOnClickListener(v -> {
             startActivity(new Intent(this, GroceryListActivity.class));
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
             ensureMilkIngredientExists(ingredientDao);
 
-            //ADD TEST HOOK HERE
+            // (your test hook)
             List<Ingredient> all = ingredientDao.getAll();
             for (Ingredient ing : all) {
                 if ("milk".equals(ing.getNameNormalized()) && !ing.isFrequent()) {
@@ -92,8 +92,6 @@ public class MainActivity extends AppCompatActivity {
             if (milkIngredientId == -1) return;
 
             PantryItem milkPantry = new PantryItem(milkIngredientId, 1.0, "gallon");
-
-            // TEST HOOK: give milk an expiry so "Expiring Soon" isn't empty
             milkPantry.expiresAt = System.currentTimeMillis() + (3L * DAY_MILLIS);
 
             try {
@@ -119,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                 refreshPantryText();
                 refreshLowUI();
                 refreshExpiringUI();
-                refreshFrequentUI(); // NEW
+                refreshFrequentUI();
             });
         }).start());
 
@@ -146,31 +144,33 @@ public class MainActivity extends AppCompatActivity {
                 refreshPantryText();
                 refreshLowUI();
                 refreshExpiringUI();
-                refreshFrequentUI(); // NEW
+                refreshFrequentUI();
             });
         }).start());
 
+        // IMPORTANT: grocery list is now decoupled, so this just inserts a grocery item by name.
         btnBuyMilk.setOnClickListener(v -> new Thread(() -> {
             AppDatabase db = DatabaseProvider.getDatabase(this);
-            IngredientDao ingredientDao = db.ingredientDao();
             GroceryListDao groceryDao = db.groceryListDao();
 
-            ensureMilkIngredientExists(ingredientDao);
+            String rawName = "Milk";
+            String normalized = "milk";
 
-            long milkIngredientId = findMilkIngredientId(ingredientDao);
-            if (milkIngredientId == -1) return;
+            long result = groceryDao.insert(new GroceryListItem(
+                    rawName,
+                    normalized,
+                    null,
+                    System.currentTimeMillis(),
+                    0.0,
+                    null
+            ));
 
-            long result = groceryDao.insert(new GroceryListItem(milkIngredientId, System.currentTimeMillis()));
-            if (result == -1L) {
-                Log.d("GROCERY", "Milk already in grocery list (ignored duplicate tap)");
-            } else {
-                Log.d("GROCERY", "Milk added to grocery list (rowId=" + result + ")");
-            }
+            Log.d("GROCERY", "Milk inserted rowId=" + result);
 
             List<GroceryRow> grocery = groceryDao.getAll();
             Log.d("GROCERY", "grocery size = " + grocery.size());
             for (GroceryRow row : grocery) {
-                Log.d("GROCERY", row.ingredientName + " (ingredientId=" + row.ingredientId + ")");
+                Log.d("GROCERY", row.name + " (id=" + row.groceryItemId + ")");
             }
         }).start());
     }
@@ -226,12 +226,19 @@ public class MainActivity extends AppCompatActivity {
                     b.setText("Add to grocery: " + row.ingredientName);
 
                     b.setOnClickListener(v -> new Thread(() -> {
-                        long result = groceryDao.insert(new GroceryListItem(row.ingredientId, System.currentTimeMillis()));
-                        if (result == -1L) {
-                            Log.d("GROCERY", row.ingredientName + " already in grocery list (tap ignored)");
-                        } else {
-                            Log.d("GROCERY", row.ingredientName + " added to grocery list (rowId=" + result + ")");
-                        }
+                        String rawName = row.ingredientName;
+                        String normalized = rawName == null ? "" : rawName.toLowerCase().trim();
+
+                        long result = groceryDao.insert(new GroceryListItem(
+                                rawName,
+                                normalized,
+                                null,
+                                System.currentTimeMillis(),
+                                0.0,
+                                null
+                        ));
+
+                        Log.d("GROCERY", "Inserted from LOW: " + rawName + " rowId=" + result);
                     }).start());
 
                     lowContainer.addView(b);
@@ -264,12 +271,19 @@ public class MainActivity extends AppCompatActivity {
                     b.setText("Add to grocery: " + row.ingredientName);
 
                     b.setOnClickListener(v -> new Thread(() -> {
-                        long result = groceryDao.insert(new GroceryListItem(row.ingredientId, System.currentTimeMillis()));
-                        if (result == -1L) {
-                            Log.d("GROCERY", row.ingredientName + " already in grocery list (tap ignored)");
-                        } else {
-                            Log.d("GROCERY", row.ingredientName + " added to grocery list (rowId=" + result + ")");
-                        }
+                        String rawName = row.ingredientName;
+                        String normalized = rawName == null ? "" : rawName.toLowerCase().trim();
+
+                        long result = groceryDao.insert(new GroceryListItem(
+                                rawName,
+                                normalized,
+                                null,
+                                System.currentTimeMillis(),
+                                0.0,
+                                null
+                        ));
+
+                        Log.d("GROCERY", "Inserted from EXPIRING: " + rawName + " rowId=" + result);
                     }).start());
 
                     expiringContainer.addView(b);
@@ -278,7 +292,6 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    // NEW: Frequently Replaced section
     private void refreshFrequentUI() {
         new Thread(() -> {
             AppDatabase db = DatabaseProvider.getDatabase(this);
@@ -302,12 +315,19 @@ public class MainActivity extends AppCompatActivity {
                     b.setText("Add to grocery: " + row.ingredientName);
 
                     b.setOnClickListener(v -> new Thread(() -> {
-                        long result = groceryDao.insert(new GroceryListItem(row.ingredientId, System.currentTimeMillis()));
-                        if (result == -1L) {
-                            Log.d("GROCERY", row.ingredientName + " already in grocery list (tap ignored)");
-                        } else {
-                            Log.d("GROCERY", row.ingredientName + " added to grocery list (rowId=" + result + ")");
-                        }
+                        String rawName = row.ingredientName;
+                        String normalized = rawName == null ? "" : rawName.toLowerCase().trim();
+
+                        long result = groceryDao.insert(new GroceryListItem(
+                                rawName,
+                                normalized,
+                                null,
+                                System.currentTimeMillis(),
+                                0.0,
+                                null
+                        ));
+
+                        Log.d("GROCERY", "Inserted from FREQUENT: " + rawName + " rowId=" + result);
                     }).start());
 
                     frequentContainer.addView(b);
@@ -317,7 +337,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void ensureMilkIngredientExists(IngredientDao ingredientDao) {
-        // NOTE: after adding isFrequent, this will default to false unless you update it.
         Ingredient milk = new Ingredient("Milk", "milk", System.currentTimeMillis());
         try {
             ingredientDao.insert(milk);

@@ -160,7 +160,7 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         void bind(GroceryRow row) {
             // --- text ---
-            tvName.setText(row.ingredientName);
+            tvName.setText(row.name);
 
             String details = "";
             if (row.quantity > 0) {
