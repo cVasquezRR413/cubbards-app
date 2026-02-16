@@ -21,17 +21,16 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public interface Listener {
         void onItemClicked(GroceryRow row);
         void onDeleteClicked(GroceryRow row);
-        void onEditClicked(GroceryRow row); // NEW
+        void onEditClicked(GroceryRow row);
     }
 
-    // --- UI rows (store headers + items) ---
     public static abstract class UiRow {
         abstract int viewType();
     }
 
     public static class StoreHeaderRow extends UiRow {
-        public final String storeName;      // null => "No store"
-        public final String storeLocation;  // can be null/empty
+        public final String storeName;
+        public final String storeLocation;
 
         public StoreHeaderRow(String storeName, String storeLocation) {
             this.storeName = storeName;
@@ -50,7 +49,6 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private final Listener listener;
     private final List<UiRow> rows = new ArrayList<>();
 
-    // swipe-reveal state (managed by Activity + persisted here for binding)
     private int openedPos = RecyclerView.NO_POSITION;
     private float revealWidthPx = 0f;
 
@@ -61,7 +59,7 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public void setRows(List<UiRow> newRows) {
         rows.clear();
         rows.addAll(newRows);
-        openedPos = RecyclerView.NO_POSITION; // safer when dataset changes
+        openedPos = RecyclerView.NO_POSITION;
         notifyDataSetChanged();
     }
 
@@ -77,7 +75,6 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         int old = openedPos;
         openedPos = newPos;
 
-        // redraw both the old and new positions so translation updates
         if (old != RecyclerView.NO_POSITION) notifyItemChanged(old);
         if (newPos != RecyclerView.NO_POSITION) notifyItemChanged(newPos);
     }
@@ -121,8 +118,6 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-    // --- VHs ---
-
     static class StoreHeaderVH extends RecyclerView.ViewHolder {
         TextView chip, loc;
 
@@ -150,18 +145,38 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     class ItemVH extends RecyclerView.ViewHolder {
-        TextView tvName, tvDetails;
+        TextView tvName, tvDetails, tvPrice;
 
         ItemVH(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvName);
             tvDetails = itemView.findViewById(R.id.tvDetails);
+            tvPrice = itemView.findViewById(R.id.tvPrice);
         }
 
         void bind(GroceryRow row) {
-            // --- text ---
+
+            // --- Name ---
             tvName.setText(row.name);
 
+            // --- Price ---
+            if (tvPrice != null) {
+                if (row.priceCents != null) {
+                    int abs = Math.abs(row.priceCents);
+                    int dollars = abs / 100;
+                    int cents = abs % 100;
+
+                    String price = "$" + dollars + "." +
+                            (cents < 10 ? "0" + cents : String.valueOf(cents));
+
+                    tvPrice.setText(price);
+                    tvPrice.setVisibility(View.VISIBLE);
+                } else {
+                    tvPrice.setVisibility(View.GONE);
+                }
+            }
+
+            // --- Details ---
             String details = "";
             if (row.quantity > 0) {
                 String q = (row.quantity == Math.rint(row.quantity))
@@ -182,10 +197,10 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 tvDetails.setVisibility(View.GONE);
             }
 
-            // --- IMPORTANT: persist reveal position on bind ---
+            // --- Swipe reveal persistence ---
             View fg = itemView.findViewById(R.id.itemForeground);
             if (fg != null) {
-                int pos = getAdapterPosition(); // works on all versions
+                int pos = getAdapterPosition();
                 if (pos != RecyclerView.NO_POSITION && pos == openedPos) {
                     fg.setTranslationX(-revealWidthPx);
                 } else {
@@ -193,7 +208,7 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             }
 
-            // --- clicks ---
+            // --- Clicks ---
             View fgClick = itemView.findViewById(R.id.itemForeground);
             if (fgClick != null) {
                 fgClick.setOnClickListener(v -> listener.onItemClicked(row));
@@ -206,7 +221,6 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 del.setOnClickListener(v -> listener.onDeleteClicked(row));
             }
 
-            // NEW: edit (pencil) click
             View edit = itemView.findViewById(R.id.btnEdit);
             if (edit != null) {
                 edit.setOnClickListener(v -> listener.onEditClicked(row));

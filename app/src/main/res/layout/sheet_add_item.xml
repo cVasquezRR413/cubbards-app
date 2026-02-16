@@ -45,6 +45,17 @@
             android:layout_marginStart="12dp" />
     </LinearLayout>
 
+    <!-- Price (optional) -->
+    <EditText
+        android:id="@+id/etPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="Price (optional)"
+        android:inputType="numberDecimal"
+        android:maxLength="6"
+        android:padding="12dp"/>
+
     <!-- Store selector -->
     <Spinner
         android:id="@+id/spStore"

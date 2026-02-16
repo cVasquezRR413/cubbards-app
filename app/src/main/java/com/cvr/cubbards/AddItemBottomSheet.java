@@ -62,6 +62,32 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
     }
 
     @Nullable
+    private Integer parsePriceToCents(@Nullable String raw) {
+        if (raw == null) return null;
+
+        String s = raw.trim();
+        if (s.isEmpty()) return null;
+
+        // Allow: 123, 123., 123.4, 123.45
+        if (!s.matches("^\\d+(\\.\\d{0,2})?$")) return null;
+
+        // Normalize "12." -> "12"
+        if (s.endsWith(".")) s = s.substring(0, s.length() - 1);
+
+        String[] parts = s.split("\\.");
+        int dollars = Integer.parseInt(parts[0]);
+
+        int cents = 0;
+        if (parts.length == 2) {
+            String frac = parts[1];
+            if (frac.length() == 1) frac = frac + "0";
+            if (frac.length() == 2) cents = Integer.parseInt(frac);
+        }
+
+        return dollars * 100 + cents;
+    }
+
+    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
@@ -89,6 +115,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
 
         EditText etName = view.findViewById(R.id.etName);
         EditText etQuantity = view.findViewById(R.id.etQuantity);
+        EditText etPrice = view.findViewById(R.id.etPrice);
         Spinner spUnit = view.findViewById(R.id.spUnit);
         Spinner spStore = view.findViewById(R.id.spStore);
         EditText etStoreName = view.findViewById(R.id.etStoreName);
@@ -99,6 +126,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         if (isEdit) {
             if (editName != null) etName.setText(editName);
             if (editQty > 0) etQuantity.setText(String.valueOf(editQty));
+            // price prefill comes later once GroceryRow includes it
         }
 
         ArrayAdapter<CharSequence> unitAdapter =
@@ -185,6 +213,14 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                     etQuantity.getText().toString().trim();
             double qty = TextUtils.isEmpty(qtyRaw) ? 0.0 : Double.parseDouble(qtyRaw);
 
+            // Price parsing (optional)
+            String priceRaw = etPrice.getText() == null ? "" : etPrice.getText().toString();
+            Integer priceCents = parsePriceToCents(priceRaw);
+            if (priceRaw != null && !priceRaw.trim().isEmpty() && priceCents == null) {
+                etPrice.setError("Enter a valid price (e.g., 5.45)");
+                return;
+            }
+
             String unit = null;
             if (spUnit.getSelectedItem() != null) {
                 String s = spUnit.getSelectedItem().toString().trim();
@@ -203,6 +239,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             final String finalNormalized = normalized;
             final double finalQty = qty;
             final String finalUnit = unit;
+            @Nullable final Integer finalPriceCents = priceCents;
 
             new Thread(() -> {
                 AppDatabase db = DatabaseProvider.getDatabase(requireContext());
@@ -227,6 +264,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                             finalNormalized,
                             finalQty,
                             finalUnit,
+                            finalPriceCents,
                             storeIdToUse
                     );
                 } else {
@@ -236,7 +274,8 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                             storeIdToUse,
                             System.currentTimeMillis(),
                             finalQty,
-                            finalUnit
+                            finalUnit,
+                            finalPriceCents
                     ));
                 }
 

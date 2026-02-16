@@ -162,7 +162,8 @@ public class MainActivity extends AppCompatActivity {
                     null,
                     System.currentTimeMillis(),
                     0.0,
-                    null
+                    null,
+                    null   // priceCents
             ));
 
             Log.d("GROCERY", "Milk inserted rowId=" + result);
@@ -235,7 +236,8 @@ public class MainActivity extends AppCompatActivity {
                                 null,
                                 System.currentTimeMillis(),
                                 0.0,
-                                null
+                                null,
+                                null   // priceCents
                         ));
 
                         Log.d("GROCERY", "Inserted from LOW: " + rawName + " rowId=" + result);
@@ -280,7 +282,8 @@ public class MainActivity extends AppCompatActivity {
                                 null,
                                 System.currentTimeMillis(),
                                 0.0,
-                                null
+                                null,
+                                null   // priceCents
                         ));
 
                         Log.d("GROCERY", "Inserted from EXPIRING: " + rawName + " rowId=" + result);
@@ -324,7 +327,8 @@ public class MainActivity extends AppCompatActivity {
                                 null,
                                 System.currentTimeMillis(),
                                 0.0,
-                                null
+                                null,
+                                null   // priceCents
                         ));
 
                         Log.d("GROCERY", "Inserted from FREQUENT: " + rawName + " rowId=" + result);

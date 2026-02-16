@@ -37,34 +37,28 @@
             android:layout_height="wrap_content"
             android:minHeight="60dp"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
+            android:gravity="top"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:paddingTop="8dp"
             android:paddingBottom="8dp">
 
-            <TextView
-                android:id="@+id/tvBullet"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:text="○"
-                android:textSize="20sp"
-                android:textColor="#4F6DFF"/>
-
+            <!-- LEFT COLUMN: Name + details -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="12dp"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/tvName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textColor="#1F1F1F"/>
+                    android:textColor="#1F1F1F"
+                    android:maxLines="3"
+                    android:maxLength="100" />
 
                 <TextView
                     android:id="@+id/tvDetails"
@@ -76,27 +70,53 @@
                     android:visibility="gone"/>
             </LinearLayout>
 
-            <!-- EDIT BUTTON (48dp touch target) -->
-            <ImageView
-                android:id="@+id/btnEdit"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="8dp"
-                android:layout_gravity="center_vertical"
-                android:padding="12dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_edit"
-                app:tint="#9E9E9E"
-                android:contentDescription="Edit item"
-                android:clickable="true"
-                android:focusable="true" />
+            <!-- RIGHT SIDE: Price + Edit aligned to top line -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="top"
+                android:layout_marginStart="12dp">
+
+                <TextView
+                    android:id="@+id/tvPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="15sp"
+                    android:textColor="#777777"
+                    android:gravity="end"
+                    android:maxLines="1"
+                    android:visibility="gone" />
+
+                <!-- EDIT TOUCH TARGET (48dp), icon inside aligned to top -->
+                <FrameLayout
+                    android:id="@+id/btnEdit"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Edit item">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="top|end"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:src="@drawable/ic_edit"
+                        app:tint="#9E9E9E" />
+                </FrameLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginStart="50dp"
+            android:layout_marginStart="16dp"
             android:background="#E0E0E0"/>
     </LinearLayout>
 

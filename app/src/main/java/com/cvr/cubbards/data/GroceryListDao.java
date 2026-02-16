@@ -17,13 +17,14 @@ public interface GroceryListDao {
     @Query("DELETE FROM grocery_list_items WHERE id = :groceryItemId")
     int deleteById(long groceryItemId);
 
-    // full edit support (including name)
+    // full edit support (including name + price)
     @Query(
             "UPDATE grocery_list_items SET " +
                     "name = :name, " +
                     "nameNormalized = :nameNormalized, " +
                     "quantity = :quantity, " +
                     "unit = :unit, " +
+                    "priceCents = :priceCents, " +
                     "storeId = :storeId " +
                     "WHERE id = :groceryItemId"
     )
@@ -32,6 +33,7 @@ public interface GroceryListDao {
                    String nameNormalized,
                    double quantity,
                    String unit,
+                   Integer priceCents,
                    Long storeId);
 
     @Query(
@@ -42,6 +44,7 @@ public interface GroceryListDao {
                     "gli.addedAt AS addedAt, " +
                     "gli.quantity AS quantity, " +
                     "gli.unit AS unit, " +
+                    "gli.priceCents AS priceCents, " +
                     "gli.storeId AS storeId, " +
                     "s.name AS storeName, " +
                     "s.location AS storeLocation " +

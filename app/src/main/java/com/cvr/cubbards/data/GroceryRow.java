@@ -17,4 +17,6 @@ public class GroceryRow {
     public Long storeId;
     public String storeName;
     public String storeLocation;
+
+    public Integer priceCents;
 }

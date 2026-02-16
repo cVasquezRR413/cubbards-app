@@ -1,5 +1,6 @@
 package com.cvr.cubbards.data;
 
+import androidx.annotation.Nullable;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Ignore;
@@ -40,19 +41,25 @@ public class GroceryListItem {
 
     public String unit;
 
+    // Optional price (stored as cents)
+    @Nullable
+    public Integer priceCents;
+
     // Primary constructor
     public GroceryListItem(String name,
                            String nameNormalized,
                            Long storeId,
                            long addedAt,
                            double quantity,
-                           String unit) {
+                           String unit,
+                           @Nullable Integer priceCents) {
         this.name = name;
         this.nameNormalized = nameNormalized;
         this.storeId = storeId;
         this.addedAt = addedAt;
         this.quantity = quantity;
         this.unit = unit;
+        this.priceCents = priceCents;
     }
 
     // Convenience constructor (no store)
@@ -61,7 +68,18 @@ public class GroceryListItem {
                            String nameNormalized,
                            long addedAt,
                            double quantity,
+                           String unit,
+                           @Nullable Integer priceCents) {
+        this(name, nameNormalized, null, addedAt, quantity, unit, priceCents);
+    }
+
+    // Convenience constructor (no store, no price)
+    @Ignore
+    public GroceryListItem(String name,
+                           String nameNormalized,
+                           long addedAt,
+                           double quantity,
                            String unit) {
-        this(name, nameNormalized, null, addedAt, quantity, unit);
+        this(name, nameNormalized, null, addedAt, quantity, unit, null);
     }
 }
