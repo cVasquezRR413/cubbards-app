@@ -1,5 +1,7 @@
 package com.cvr.cubbards;
 
+import android.graphics.Paint;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +21,12 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private static final int VT_ITEM = 2;
 
     public interface Listener {
+        // Called when row is open; should close reveal
         void onItemClicked(GroceryRow row);
+
+        // Called when row is closed; should toggle completion
+        void onToggleCompleted(GroceryRow row);
+
         void onDeleteClicked(GroceryRow row);
         void onEditClicked(GroceryRow row);
     }
@@ -159,6 +166,18 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             // --- Name ---
             tvName.setText(row.name);
 
+            // --- Completed UI (strike + ellipsize when completed) ---
+            if (row.isCompleted) {
+                tvName.setPaintFlags(tvName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                tvName.setSingleLine(true);
+                tvName.setEllipsize(TextUtils.TruncateAt.END);
+            } else {
+                tvName.setPaintFlags(tvName.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                tvName.setSingleLine(false);
+                tvName.setEllipsize(null);
+                tvName.setMaxLines(3); // restore normal wrapping (matches your XML intent)
+            }
+
             // --- Price ---
             if (tvPrice != null) {
                 if (row.priceCents != null) {
@@ -208,13 +227,18 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             }
 
-            // --- Clicks ---
+            // --- Clicks (close if open; toggle if closed) ---
             View fgClick = itemView.findViewById(R.id.itemForeground);
-            if (fgClick != null) {
-                fgClick.setOnClickListener(v -> listener.onItemClicked(row));
-            } else {
-                itemView.setOnClickListener(v -> listener.onItemClicked(row));
-            }
+            View clickTarget = (fgClick != null) ? fgClick : itemView;
+
+            clickTarget.setOnClickListener(v -> {
+                int pos = getAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION && pos == openedPos) {
+                    listener.onItemClicked(row); // close reveal
+                } else {
+                    listener.onToggleCompleted(row); // toggle completion
+                }
+            });
 
             View del = itemView.findViewById(R.id.btnDelete);
             if (del != null) {

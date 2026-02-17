@@ -45,6 +45,8 @@ public class GroceryListItem {
     @Nullable
     public Integer priceCents;
 
+    public boolean isCompleted;
+
     // Primary constructor
     public GroceryListItem(String name,
                            String nameNormalized,

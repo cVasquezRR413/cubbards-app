@@ -13,7 +13,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
                 PantryItem.class,
                 GroceryListItem.class
         },
-        version = 10,
+        version = 11,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -210,6 +210,17 @@ public abstract class AppDatabase extends RoomDatabase {
         @Override
         public void migrate(SupportSQLiteDatabase db) {
             db.execSQL("ALTER TABLE `grocery_list_items` ADD COLUMN `priceCents` INTEGER");
+        }
+    };
+
+    // 10 → 11 : grocery_list_items.isCompleted
+    public static final Migration MIGRATION_10_11 = new Migration(10, 11) {
+        @Override
+        public void migrate(SupportSQLiteDatabase db) {
+            db.execSQL(
+                    "ALTER TABLE `grocery_list_items` " +
+                            "ADD COLUMN `isCompleted` INTEGER NOT NULL DEFAULT 0"
+            );
         }
     };
 }

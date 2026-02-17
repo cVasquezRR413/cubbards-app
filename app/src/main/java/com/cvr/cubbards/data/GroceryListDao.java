@@ -17,6 +17,10 @@ public interface GroceryListDao {
     @Query("DELETE FROM grocery_list_items WHERE id = :groceryItemId")
     int deleteById(long groceryItemId);
 
+    // toggle completion
+    @Query("UPDATE grocery_list_items SET isCompleted = :completed WHERE id = :groceryItemId")
+    int setCompleted(long groceryItemId, boolean completed);
+
     // full edit support (including name + price)
     @Query(
             "UPDATE grocery_list_items SET " +
@@ -41,6 +45,7 @@ public interface GroceryListDao {
                     "gli.id AS groceryItemId, " +
                     "gli.name AS name, " +
                     "gli.nameNormalized AS nameNormalized, " +
+                    "gli.isCompleted AS isCompleted, " +
                     "gli.addedAt AS addedAt, " +
                     "gli.quantity AS quantity, " +
                     "gli.unit AS unit, " +

@@ -19,4 +19,6 @@ public class GroceryRow {
     public String storeLocation;
 
     public Integer priceCents;
+
+    public boolean isCompleted;
 }

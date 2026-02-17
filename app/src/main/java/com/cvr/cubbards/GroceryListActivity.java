@@ -64,6 +64,11 @@ public class GroceryListActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onToggleCompleted(GroceryRow row) {
+                toggleCompleted(row);
+            }
+
+            @Override
             public void onDeleteClicked(GroceryRow row) {
                 deleteRow(row);
             }
@@ -114,6 +119,27 @@ public class GroceryListActivity extends AppCompatActivity {
 
             runOnUiThread(() -> {
                 adapter.setOpenedPos(RecyclerView.NO_POSITION);
+                refreshGroceryUI();
+            });
+        }).start();
+    }
+
+    private void toggleCompleted(GroceryRow row) {
+        new Thread(() -> {
+            AppDatabase db = DatabaseProvider.getDatabase(GroceryListActivity.this);
+            GroceryListDao dao = db.groceryListDao();
+
+            boolean newValue = !row.isCompleted;
+            int updated = dao.setCompleted(row.groceryItemId, newValue);
+
+            Log.d(TAG, "Toggle completed: " + row.name
+                    + " id=" + row.groceryItemId
+                    + " -> " + newValue
+                    + " updated=" + updated);
+
+            runOnUiThread(() -> {
+                // if anything was open, close it (safe + consistent)
+                closeOpenedRow();
                 refreshGroceryUI();
             });
         }).start();
