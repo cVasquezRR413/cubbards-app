@@ -68,20 +68,37 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         String s = raw.trim();
         if (s.isEmpty()) return null;
 
+        // Enforce: 0–9999.99 (up to 4 digits before decimal, optional decimal, up to 2 digits after)
         // Allow: 123, 123., 123.4, 123.45
-        if (!s.matches("^\\d+(\\.\\d{0,2})?$")) return null;
+        if (!s.matches("^\\d{1,4}(\\.\\d{0,2})?$")) return null;
 
         // Normalize "12." -> "12"
         if (s.endsWith(".")) s = s.substring(0, s.length() - 1);
 
         String[] parts = s.split("\\.");
-        int dollars = Integer.parseInt(parts[0]);
+        int dollars;
+        try {
+            dollars = Integer.parseInt(parts[0]);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+
+        // Range check (redundant with regex max digits, but keeps intent explicit)
+        if (dollars < 0 || dollars > 9999) return null;
 
         int cents = 0;
         if (parts.length == 2) {
             String frac = parts[1];
             if (frac.length() == 1) frac = frac + "0";
-            if (frac.length() == 2) cents = Integer.parseInt(frac);
+
+            if (frac.length() == 2) {
+                try {
+                    cents = Integer.parseInt(frac);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+                if (cents < 0 || cents > 99) return null;
+            }
         }
 
         return dollars * 100 + cents;
@@ -217,7 +234,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             String priceRaw = etPrice.getText() == null ? "" : etPrice.getText().toString();
             Integer priceCents = parsePriceToCents(priceRaw);
             if (priceRaw != null && !priceRaw.trim().isEmpty() && priceCents == null) {
-                etPrice.setError("Enter a valid price (e.g., 5.45)");
+                etPrice.setError("Enter a valid price (0–9999.99)");
                 return;
             }
 
