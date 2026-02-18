@@ -13,7 +13,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
                 PantryItem.class,
                 GroceryListItem.class
         },
-        version = 11,
+        version = 12,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -220,6 +220,62 @@ public abstract class AppDatabase extends RoomDatabase {
             db.execSQL(
                     "ALTER TABLE `grocery_list_items` " +
                             "ADD COLUMN `isCompleted` INTEGER NOT NULL DEFAULT 0"
+            );
+        }
+    };
+
+    // 11 → 12 : enforce name length <= 60 via CHECK constraints (table rebuild required)
+    public static final Migration MIGRATION_11_12 = new Migration(11, 12) {
+        @Override
+        public void migrate(SupportSQLiteDatabase db) {
+
+            // Rebuild table with CHECK constraints for name/nameNormalized length
+            db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `grocery_list_items_new` (" +
+                            "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                            "`name` TEXT, " +
+                            "`nameNormalized` TEXT, " +
+                            "`storeId` INTEGER, " +
+                            "`addedAt` INTEGER NOT NULL, " +
+                            "`quantity` REAL NOT NULL DEFAULT 0, " +
+                            "`unit` TEXT, " +
+                            "`priceCents` INTEGER, " +
+                            "`isCompleted` INTEGER NOT NULL DEFAULT 0, " +
+                            "FOREIGN KEY(`storeId`) REFERENCES `stores`(`storeId`) " +
+                            "ON UPDATE NO ACTION ON DELETE SET NULL, " +
+                            "CHECK(`name` IS NULL OR length(`name`) <= 60), " +
+                            "CHECK(`nameNormalized` IS NULL OR length(`nameNormalized`) <= 60)" +
+                            ")"
+            );
+
+            // Copy existing rows; truncate any over-limit names to avoid migration failure
+            db.execSQL(
+                    "INSERT INTO `grocery_list_items_new` " +
+                            "(`id`, `name`, `nameNormalized`, `storeId`, `addedAt`, `quantity`, `unit`, `priceCents`, `isCompleted`) " +
+                            "SELECT " +
+                            "`id`, " +
+                            "CASE WHEN `name` IS NULL THEN NULL ELSE substr(`name`, 1, 60) END, " +
+                            "CASE WHEN `nameNormalized` IS NULL THEN NULL ELSE substr(`nameNormalized`, 1, 60) END, " +
+                            "`storeId`, " +
+                            "`addedAt`, " +
+                            "`quantity`, " +
+                            "`unit`, " +
+                            "`priceCents`, " +
+                            "`isCompleted` " +
+                            "FROM `grocery_list_items`"
+            );
+
+            db.execSQL("DROP TABLE `grocery_list_items`");
+            db.execSQL("ALTER TABLE `grocery_list_items_new` RENAME TO `grocery_list_items`");
+
+            // Recreate indexes required by @Entity(indices=...)
+            db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_grocery_list_items_nameNormalized` " +
+                            "ON `grocery_list_items` (`nameNormalized`)"
+            );
+            db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_grocery_list_items_storeId` " +
+                            "ON `grocery_list_items` (`storeId`)"
             );
         }
     };

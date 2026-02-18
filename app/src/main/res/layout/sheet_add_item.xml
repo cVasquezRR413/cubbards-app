@@ -20,6 +20,7 @@
         android:layout_height="wrap_content"
         android:hint="Name"
         android:inputType="textPersonName"
+        android:maxLength="60"
         android:padding="12dp"/>
 
     <!-- Quantity + Unit row -->

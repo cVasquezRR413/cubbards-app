@@ -31,12 +31,15 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
     private static final String STORE_NONE = "(none)";
     private static final String STORE_NEW = "New store…";
 
+    private static final int MAX_NAME_LENGTH = 60;
+
     private static final String ARG_IS_EDIT = "is_edit";
     private static final String ARG_GROCERY_ITEM_ID = "grocery_item_id";
     private static final String ARG_NAME = "name";
     private static final String ARG_QUANTITY = "quantity";
     private static final String ARG_UNIT = "unit";
     private static final String ARG_STORE_ID = "store_id";
+    private static final String ARG_PRICE_CENTS = "price_cents"; // ✅ NEW
 
     private List<Store> stores = new ArrayList<>();
     private ArrayAdapter<String> storeAdapter;
@@ -47,6 +50,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
     private double editQty = 0.0;
     private String editUnit = null;
     private Long editStoreId = null;
+    @Nullable private Integer editPriceCents = null; // ✅ NEW
 
     public static AddItemBottomSheet newEditInstance(GroceryRow row) {
         AddItemBottomSheet sheet = new AddItemBottomSheet();
@@ -57,6 +61,10 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         b.putDouble(ARG_QUANTITY, row.quantity);
         b.putString(ARG_UNIT, row.unit);
         if (row.storeId != null) b.putLong(ARG_STORE_ID, row.storeId);
+
+        // ✅ pass price through so edits don't wipe it
+        if (row.priceCents != null) b.putInt(ARG_PRICE_CENTS, row.priceCents);
+
         sheet.setArguments(b);
         return sheet;
     }
@@ -83,7 +91,6 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             return null;
         }
 
-        // Range check (redundant with regex max digits, but keeps intent explicit)
         if (dollars < 0 || dollars > 9999) return null;
 
         int cents = 0;
@@ -128,6 +135,9 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             if (args.containsKey(ARG_STORE_ID)) {
                 editStoreId = args.getLong(ARG_STORE_ID);
             }
+            if (args.containsKey(ARG_PRICE_CENTS)) {
+                editPriceCents = args.getInt(ARG_PRICE_CENTS);
+            }
         }
 
         EditText etName = view.findViewById(R.id.etName);
@@ -143,7 +153,15 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         if (isEdit) {
             if (editName != null) etName.setText(editName);
             if (editQty > 0) etQuantity.setText(String.valueOf(editQty));
-            // price prefill comes later once GroceryRow includes it
+
+            // ✅ Prefill price so editing name/unit/store doesn't wipe it
+            if (editPriceCents != null) {
+                int abs = Math.abs(editPriceCents);
+                int dollars = abs / 100;
+                int cents = abs % 100;
+                String priceText = dollars + "." + (cents < 10 ? "0" + cents : String.valueOf(cents));
+                etPrice.setText(priceText);
+            }
         }
 
         ArrayAdapter<CharSequence> unitAdapter =
@@ -224,6 +242,11 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                     etName.getText().toString().trim();
             if (TextUtils.isEmpty(rawName)) return;
 
+            if (rawName.length() > MAX_NAME_LENGTH) {
+                etName.setError("Name must be " + MAX_NAME_LENGTH + " characters or fewer");
+                return;
+            }
+
             String normalized = rawName.toLowerCase().trim();
 
             String qtyRaw = etQuantity.getText() == null ? "" :
@@ -251,7 +274,6 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                     (storePos <= 0 || wantsNewStore) ? null :
                             stores.get(storePos - 2).getStoreId();
 
-            // ✅ make everything effectively final
             final String finalName = rawName;
             final String finalNormalized = normalized;
             final double finalQty = qty;
