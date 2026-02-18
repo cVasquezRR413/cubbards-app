@@ -6,65 +6,216 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
+    <!-- NAME -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add Item"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:paddingBottom="12dp"/>
+        android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/etName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Name"
-        android:inputType="textPersonName"
-        android:maxLength="60"
-        android:padding="12dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="NAME"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/sheet_label_text"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="4dp"/>
 
-    <!-- Quantity + Unit row -->
+        <EditText
+            android:id="@+id/etName"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_outline_box"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:gravity="center_vertical"
+            android:inputType="textPersonName"
+            android:maxLength="60"
+            android:hint="Flour"/>
+    </LinearLayout>
+
+    <!-- MEASURE + AMT row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="12dp">
+        android:layout_marginTop="16dp">
 
-        <EditText
-            android:id="@+id/etQuantity"
+        <!-- MEASURE -->
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Quantity"
-            android:inputType="numberDecimal"
-            android:padding="12dp"/>
+            android:orientation="vertical">
 
-        <Spinner
-            android:id="@+id/spUnit"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MEASURE"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/sheet_label_text"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="4dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_outline_box"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp">
+
+                <EditText
+                    android:id="@+id/etQuantity"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="80"
+                    android:inputType="numberDecimal"
+                    android:textSize="16sp"
+                    android:padding="0dp"/>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@color/sheet_divider"/>
+
+                <Spinner
+                    android:id="@+id/spUnit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- AMT -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp" />
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AMT"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/sheet_label_text"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="4dp"/>
+
+            <!-- FULL-FLUSH segmented look -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_outline_box"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp">
+
+                <TextView
+                    android:id="@+id/btnAmtPlus"
+                    android:layout_width="48dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_small_square_outline"
+                    android:gravity="center"
+                    android:text="+"
+                    android:textColor="@color/sheet_label_text"
+                    android:textSize="18sp"/>
+
+                <TextView
+                    android:id="@+id/tvAmtValue"
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="1"
+                    android:textSize="16sp"/>
+
+                <TextView
+                    android:id="@+id/btnAmtMinus"
+                    android:layout_width="48dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_small_square_outline"
+                    android:gravity="center"
+                    android:text="−"
+                    android:textColor="@color/sheet_label_text"
+                    android:textSize="18sp"/>
+            </LinearLayout>
+        </LinearLayout>
+
     </LinearLayout>
 
-    <!-- Price (optional) -->
-    <EditText
-        android:id="@+id/etPrice"
+    <!-- PRICE -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:hint="Price (optional)"
-        android:inputType="numberDecimal"
-        android:maxLength="7"
-        android:padding="12dp"/>
+        android:orientation="vertical"
+        android:layout_marginTop="16dp">
 
-    <!-- Store selector -->
-    <Spinner
-        android:id="@+id/spStore"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PRICE"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/sheet_label_text"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="4dp"/>
+
+        <EditText
+            android:id="@+id/etPrice"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_outline_box"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:gravity="center_vertical"
+            android:inputType="numberDecimal"
+            android:maxLength="7"
+            android:hint="$4.00"/>
+    </LinearLayout>
+
+    <!-- STORE -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp" />
+        android:orientation="vertical"
+        android:layout_marginTop="16dp">
 
-    <!-- New store fields (hidden unless user picks "New store…") -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="STORE"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/sheet_label_text"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="4dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_outline_box"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp">
+
+            <Spinner
+                android:id="@+id/spStore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- (Optional) New store fields - keep for now, can redesign later -->
     <EditText
         android:id="@+id/etStoreName"
         android:layout_width="match_parent"
@@ -85,12 +236,13 @@
         android:layout_marginTop="12dp"
         android:visibility="gone"/>
 
+    <!-- Actions -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="end"
-        android:paddingTop="12dp">
+        android:layout_marginTop="20dp">
 
         <Button
             android:id="@+id/btnCancel"
@@ -102,7 +254,7 @@
             android:id="@+id/btnSave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Save"
+            android:text="Add"
             android:layout_marginStart="12dp"/>
     </LinearLayout>
 

@@ -4,4 +4,9 @@
     <color name="white">#FFFFFFFF</color>
     <color name="fab_green">#53AF3F</color>
 
+    <!-- Bottom sheet theme colors -->
+    <color name="sheet_field_stroke">#4CAF50</color>
+    <color name="sheet_field_fill">#00000000</color> <!-- transparent -->
+    <color name="sheet_label_text">#4CAF50</color>
+    <color name="sheet_divider">#4CAF50</color>
 </resources>
