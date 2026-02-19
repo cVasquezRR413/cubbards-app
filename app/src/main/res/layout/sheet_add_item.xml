@@ -59,6 +59,7 @@
                 android:layout_marginStart="4dp"
                 android:layout_marginBottom="4dp"/>
 
+            <!-- UPDATED: Quantity has fixed width; spinner flexes. Divider shifts toward center. -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
@@ -66,13 +67,12 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:paddingStart="12dp"
-                android:paddingEnd="12dp">
+                android:paddingEnd="8dp">
 
                 <EditText
                     android:id="@+id/etQuantity"
-                    android:layout_width="0dp"
+                    android:layout_width="88dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:background="@android:color/transparent"
                     android:hint="80"
                     android:inputType="numberDecimal"
@@ -88,8 +88,11 @@
 
                 <Spinner
                     android:id="@+id/spUnit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -110,7 +113,6 @@
                 android:layout_marginStart="4dp"
                 android:layout_marginBottom="4dp"/>
 
-            <!-- FULL-FLUSH segmented look -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
@@ -120,24 +122,7 @@
                 android:paddingStart="0dp"
                 android:paddingEnd="0dp">
 
-                <TextView
-                    android:id="@+id/btnAmtPlus"
-                    android:layout_width="48dp"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/bg_small_square_outline"
-                    android:gravity="center"
-                    android:text="+"
-                    android:textColor="@color/sheet_label_text"
-                    android:textSize="18sp"/>
-
-                <TextView
-                    android:id="@+id/tvAmtValue"
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="1"
-                    android:textSize="16sp"/>
-
+                <!-- SWAPPED: MINUS on left -->
                 <TextView
                     android:id="@+id/btnAmtMinus"
                     android:layout_width="48dp"
@@ -145,6 +130,31 @@
                     android:background="@drawable/bg_small_square_outline"
                     android:gravity="center"
                     android:text="−"
+                    android:textColor="@color/sheet_label_text"
+                    android:textSize="18sp"/>
+
+                <!-- value stays in middle -->
+                <EditText
+                    android:id="@+id/tvAmtValue"
+                    android:layout_width="52dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="1"
+                    android:textSize="16sp"
+                    android:inputType="number"
+                    android:maxLength="3"
+                    android:imeOptions="actionDone"
+                    android:background="@android:color/transparent"
+                    android:padding="0dp" />
+
+                <!-- SWAPPED: PLUS on right -->
+                <TextView
+                    android:id="@+id/btnAmtPlus"
+                    android:layout_width="48dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_small_square_outline"
+                    android:gravity="center"
+                    android:text="+"
                     android:textColor="@color/sheet_label_text"
                     android:textSize="18sp"/>
             </LinearLayout>
@@ -202,6 +212,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
+            android:layout_marginTop="0dp"
             android:background="@drawable/bg_outline_box"
             android:orientation="horizontal"
             android:gravity="center_vertical"
@@ -215,7 +226,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- (Optional) New store fields - keep for now, can redesign later -->
+    <!-- Hidden New Store Fields -->
     <EditText
         android:id="@+id/etStoreName"
         android:layout_width="match_parent"

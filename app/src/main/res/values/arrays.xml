@@ -8,5 +8,6 @@
         <item>bags</item>
         <item>boxes</item>
         <item>cans</item>
+        <item>bottles</item>
     </string-array>
 </resources>

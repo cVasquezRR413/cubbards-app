@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,6 +33,10 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
     private static final String STORE_NEW = "New store…";
 
     private static final int MAX_NAME_LENGTH = 60;
+
+    // AMT constraints
+    private static final int AMT_MIN = 1;
+    private static final int AMT_MAX = 999;
 
     private static final String ARG_IS_EDIT = "is_edit";
     private static final String ARG_GROCERY_ITEM_ID = "grocery_item_id";
@@ -111,6 +116,12 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         return dollars * 100 + cents;
     }
 
+    private static int clampInt(int v, int min, int max) {
+        if (v < min) return min;
+        if (v > max) return max;
+        return v;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -149,6 +160,51 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         EditText etStoreLocation = view.findViewById(R.id.etStoreLocation);
         Button btnCancel = view.findViewById(R.id.btnCancel);
         Button btnSave = view.findViewById(R.id.btnSave);
+
+        // AMT UI (direct entry + clamp)
+        TextView btnAmtPlus = view.findViewById(R.id.btnAmtPlus);
+        TextView btnAmtMinus = view.findViewById(R.id.btnAmtMinus);
+        EditText etAmtValue = view.findViewById(R.id.tvAmtValue);
+
+        Runnable clampAmt = () -> {
+            String s = etAmtValue.getText() == null ? "" : etAmtValue.getText().toString().trim();
+            if (s.isEmpty()) {
+                etAmtValue.setText(String.valueOf(AMT_MIN));
+                return;
+            }
+
+            try {
+                int v = Integer.parseInt(s);
+                v = clampInt(v, AMT_MIN, AMT_MAX);
+                etAmtValue.setText(String.valueOf(v));
+            } catch (NumberFormatException e) {
+                etAmtValue.setText(String.valueOf(AMT_MIN));
+            }
+        };
+
+        // Ensure initial is valid
+        clampAmt.run();
+
+        btnAmtPlus.setOnClickListener(v -> {
+            clampAmt.run();
+            int current = Integer.parseInt(etAmtValue.getText().toString());
+            if (current < AMT_MAX) {
+                etAmtValue.setText(String.valueOf(current + 1));
+            }
+        });
+
+        btnAmtMinus.setOnClickListener(v -> {
+            clampAmt.run();
+            int current = Integer.parseInt(etAmtValue.getText().toString());
+            if (current > AMT_MIN) {
+                etAmtValue.setText(String.valueOf(current - 1));
+            }
+        });
+
+        // Clamp when user leaves the field
+        etAmtValue.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) clampAmt.run();
+        });
 
         if (isEdit) {
             if (editName != null) etName.setText(editName);
