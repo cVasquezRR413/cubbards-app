@@ -34,7 +34,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
 
     private static final int MAX_NAME_LENGTH = 60;
 
-    // AMT constraints
+    // AMT constraints (we will use this value as buyQuantity)
     private static final int AMT_MIN = 1;
     private static final int AMT_MAX = 999;
 
@@ -44,7 +44,8 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
     private static final String ARG_QUANTITY = "quantity";
     private static final String ARG_UNIT = "unit";
     private static final String ARG_STORE_ID = "store_id";
-    private static final String ARG_PRICE_CENTS = "price_cents"; // ✅ NEW
+    private static final String ARG_PRICE_CENTS = "price_cents"; // existing
+    private static final String ARG_BUY_QTY = "buy_qty";         // ✅ NEW
 
     private List<Store> stores = new ArrayList<>();
     private ArrayAdapter<String> storeAdapter;
@@ -55,7 +56,8 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
     private double editQty = 0.0;
     private String editUnit = null;
     private Long editStoreId = null;
-    @Nullable private Integer editPriceCents = null; // ✅ NEW
+    @Nullable private Integer editPriceCents = null;
+    private int editBuyQty = AMT_MIN; // ✅ NEW
 
     public static AddItemBottomSheet newEditInstance(GroceryRow row) {
         AddItemBottomSheet sheet = new AddItemBottomSheet();
@@ -67,8 +69,12 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         b.putString(ARG_UNIT, row.unit);
         if (row.storeId != null) b.putLong(ARG_STORE_ID, row.storeId);
 
-        // ✅ pass price through so edits don't wipe it
+        // pass price through so edits don't wipe it
         if (row.priceCents != null) b.putInt(ARG_PRICE_CENTS, row.priceCents);
+
+        // ✅ NEW: pass buyQuantity through so AMT prefills on edit
+        // (If older rows somehow come through as 0, clamp later will fix it.)
+        b.putInt(ARG_BUY_QTY, row.buyQuantity);
 
         sheet.setArguments(b);
         return sheet;
@@ -81,11 +87,9 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         String s = raw.trim();
         if (s.isEmpty()) return null;
 
-        // Enforce: 0–9999.99 (up to 4 digits before decimal, optional decimal, up to 2 digits after)
-        // Allow: 123, 123., 123.4, 123.45
+        // Enforce: 0–9999.99
         if (!s.matches("^\\d{1,4}(\\.\\d{0,2})?$")) return null;
 
-        // Normalize "12." -> "12"
         if (s.endsWith(".")) s = s.substring(0, s.length() - 1);
 
         String[] parts = s.split("\\.");
@@ -149,6 +153,9 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             if (args.containsKey(ARG_PRICE_CENTS)) {
                 editPriceCents = args.getInt(ARG_PRICE_CENTS);
             }
+            if (args.containsKey(ARG_BUY_QTY)) {
+                editBuyQty = args.getInt(ARG_BUY_QTY, AMT_MIN);
+            }
         }
 
         EditText etName = view.findViewById(R.id.etName);
@@ -182,6 +189,12 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             }
         };
 
+        // Prefill AMT when editing (buyQuantity)
+        if (isEdit) {
+            int prefill = clampInt(editBuyQty, AMT_MIN, AMT_MAX);
+            etAmtValue.setText(String.valueOf(prefill));
+        }
+
         // Ensure initial is valid
         clampAmt.run();
 
@@ -210,7 +223,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             if (editName != null) etName.setText(editName);
             if (editQty > 0) etQuantity.setText(String.valueOf(editQty));
 
-            // ✅ Prefill price so editing name/unit/store doesn't wipe it
+            // Prefill price so edits don't wipe it
             if (editPriceCents != null) {
                 int abs = Math.abs(editPriceCents);
                 int dollars = abs / 100;
@@ -307,7 +320,16 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
 
             String qtyRaw = etQuantity.getText() == null ? "" :
                     etQuantity.getText().toString().trim();
-            double qty = TextUtils.isEmpty(qtyRaw) ? 0.0 : Double.parseDouble(qtyRaw);
+
+            double qty = 0.0;
+            if (!TextUtils.isEmpty(qtyRaw)) {
+                try {
+                    qty = Double.parseDouble(qtyRaw);
+                } catch (NumberFormatException e) {
+                    etQuantity.setError("Enter a valid number");
+                    return;
+                }
+            }
 
             // Price parsing (optional)
             String priceRaw = etPrice.getText() == null ? "" : etPrice.getText().toString();
@@ -330,10 +352,21 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                     (storePos <= 0 || wantsNewStore) ? null :
                             stores.get(storePos - 2).getStoreId();
 
+            // ✅ buyQuantity comes from AMT field
+            clampAmt.run();
+            int buyQty;
+            try {
+                buyQty = Integer.parseInt(etAmtValue.getText().toString().trim());
+            } catch (NumberFormatException e) {
+                buyQty = AMT_MIN;
+            }
+            buyQty = clampInt(buyQty, AMT_MIN, AMT_MAX);
+
             final String finalName = rawName;
             final String finalNormalized = normalized;
             final double finalQty = qty;
             final String finalUnit = unit;
+            final int finalBuyQty = buyQty;
             @Nullable final Integer finalPriceCents = priceCents;
 
             new Thread(() -> {
@@ -359,11 +392,12 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                             finalNormalized,
                             finalQty,
                             finalUnit,
+                            finalBuyQty,      // ✅ NEW PARAM
                             finalPriceCents,
                             storeIdToUse
                     );
                 } else {
-                    groceryDao.insert(new GroceryListItem(
+                    GroceryListItem item = new GroceryListItem(
                             finalName,
                             finalNormalized,
                             storeIdToUse,
@@ -371,7 +405,9 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                             finalQty,
                             finalUnit,
                             finalPriceCents
-                    ));
+                    );
+                    item.buyQuantity = finalBuyQty; // ✅ set on insert
+                    groceryDao.insert(item);
                 }
 
                 requireActivity().runOnUiThread(() -> {

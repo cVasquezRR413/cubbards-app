@@ -21,13 +21,14 @@ public interface GroceryListDao {
     @Query("UPDATE grocery_list_items SET isCompleted = :completed WHERE id = :groceryItemId")
     int setCompleted(long groceryItemId, boolean completed);
 
-    // full edit support (including name + price)
+    // ✅ UPDATED: include buyQuantity
     @Query(
             "UPDATE grocery_list_items SET " +
                     "name = :name, " +
                     "nameNormalized = :nameNormalized, " +
                     "quantity = :quantity, " +
                     "unit = :unit, " +
+                    "buyQuantity = :buyQuantity, " +   // ✅ added
                     "priceCents = :priceCents, " +
                     "storeId = :storeId " +
                     "WHERE id = :groceryItemId"
@@ -37,6 +38,7 @@ public interface GroceryListDao {
                    String nameNormalized,
                    double quantity,
                    String unit,
+                   int buyQuantity,              // ✅ added
                    Integer priceCents,
                    Long storeId);
 
@@ -49,6 +51,7 @@ public interface GroceryListDao {
                     "gli.addedAt AS addedAt, " +
                     "gli.quantity AS quantity, " +
                     "gli.unit AS unit, " +
+                    "gli.buyQuantity AS buyQuantity, " +   // ✅ added
                     "gli.priceCents AS priceCents, " +
                     "gli.storeId AS storeId, " +
                     "s.name AS storeName, " +

@@ -86,7 +86,7 @@
                 app:layout_constraintEnd_toStartOf="@id/tvPrice"
                 app:layout_constraintTop_toTopOf="@id/tvPrice" />
 
-            <!-- NAME -->
+            <!-- NAME (will now include "(N) " prefix as part of text) -->
             <TextView
                 android:id="@+id/tvName"
                 android:layout_width="0dp"

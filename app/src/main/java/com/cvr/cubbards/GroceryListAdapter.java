@@ -1,7 +1,10 @@
 package com.cvr.cubbards;
 
-import android.graphics.Paint;
+import android.graphics.Color; // ✅ added
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.StrikethroughSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +58,12 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     // Swipe reveal state
     private int openedPos = RecyclerView.NO_POSITION;
     private float revealWidthPx = 0f;
+
+    // ✅ added (matches your XML defaults)
+    private static final int COLOR_NAME_NORMAL = Color.parseColor("#1F1F1F");
+    private static final int COLOR_NAME_COMPLETED = Color.parseColor("#9E9E9E");
+    private static final int COLOR_PRICE_NORMAL = Color.parseColor("#777777");
+    private static final int COLOR_PRICE_COMPLETED = Color.parseColor("#B0B0B0");
 
     public GroceryListAdapter(Listener listener) {
         this.listener = listener;
@@ -125,19 +134,38 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         ItemVH vh = (ItemVH) holder;
         GroceryRow row = ((ItemRow) r).row;
 
-        // --- Name ---
-        vh.tvName.setText(row.name);
+        // --- Name (now includes "(N) " inline so wrapping looks natural) ---
+        int buyQty = row.buyQuantity;
+        String prefix = (buyQty > 1) ? "(" + buyQty + ") " : "";
+        String name = (row.name == null) ? "" : row.name;
+        String full = prefix + name;
 
-        // --- Completed UI ---
+        SpannableString ss = new SpannableString(full);
+
+        // --- Completed UI (strike-through NAME only, not prefix) ---
         if (row.isCompleted) {
-            vh.tvName.setPaintFlags(vh.tvName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            int startName = prefix.length();
+            int endName = full.length();
+            if (endName > startName) {
+                ss.setSpan(new StrikethroughSpan(), startName, endName, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
             vh.tvName.setSingleLine(true);
             vh.tvName.setEllipsize(TextUtils.TruncateAt.END);
         } else {
-            vh.tvName.setPaintFlags(vh.tvName.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
             vh.tvName.setSingleLine(false);
             vh.tvName.setEllipsize(null);
             vh.tvName.setMaxLines(3);
+        }
+
+        vh.tvName.setText(ss);
+
+        // ✅ added: grey out top line when completed (name + "(N)" prefix + price)
+        if (row.isCompleted) {
+            vh.tvName.setTextColor(COLOR_NAME_COMPLETED);
+            vh.tvPrice.setTextColor(COLOR_PRICE_COMPLETED);
+        } else {
+            vh.tvName.setTextColor(COLOR_NAME_NORMAL);
+            vh.tvPrice.setTextColor(COLOR_PRICE_NORMAL);
         }
 
         // --- Price ---

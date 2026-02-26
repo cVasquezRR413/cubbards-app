@@ -59,7 +59,7 @@
                 android:layout_marginStart="4dp"
                 android:layout_marginBottom="4dp"/>
 
-            <!-- UPDATED: Quantity has fixed width; spinner flexes. Divider shifts toward center. -->
+            <!-- 30/70 split: quantity (30%) + unit (70%) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
@@ -71,8 +71,9 @@
 
                 <EditText
                     android:id="@+id/etQuantity"
-                    android:layout_width="88dp"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="3"
                     android:background="@android:color/transparent"
                     android:hint="80"
                     android:inputType="numberDecimal"
@@ -90,7 +91,7 @@
                     android:id="@+id/spUnit"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_weight="7"
                     android:paddingStart="0dp"
                     android:paddingEnd="0dp"/>
             </LinearLayout>

@@ -11,7 +11,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Grocery List:"
+        android:text="Grocery List"
         android:textSize="18sp"
         android:textStyle="bold"
         android:padding="16dp"

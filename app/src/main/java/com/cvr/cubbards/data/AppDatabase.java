@@ -13,7 +13,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
                 PantryItem.class,
                 GroceryListItem.class
         },
-        version = 12,
+        version = 13,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -156,8 +156,6 @@ public abstract class AppDatabase extends RoomDatabase {
         @Override
         public void migrate(SupportSQLiteDatabase db) {
 
-            // New schema matches GroceryListItem:
-            // id, name, nameNormalized, storeId, addedAt, quantity, unit
             db.execSQL(
                     "CREATE TABLE IF NOT EXISTS `grocery_list_items_new` (" +
                             "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
@@ -172,9 +170,6 @@ public abstract class AppDatabase extends RoomDatabase {
                             ")"
             );
 
-            // Copy existing rows:
-            // old table has ingredientId -> pull name/nameNormalized from ingredients.
-            // If ingredient is missing, fall back to '(deleted)'.
             db.execSQL(
                     "INSERT INTO `grocery_list_items_new` " +
                             "(`id`, `name`, `nameNormalized`, `storeId`, `addedAt`, `quantity`, `unit`) " +
@@ -193,7 +188,6 @@ public abstract class AppDatabase extends RoomDatabase {
             db.execSQL("DROP TABLE `grocery_list_items`");
             db.execSQL("ALTER TABLE `grocery_list_items_new` RENAME TO `grocery_list_items`");
 
-            // Indexes must match your @Entity indices:
             db.execSQL(
                     "CREATE INDEX IF NOT EXISTS `index_grocery_list_items_nameNormalized` " +
                             "ON `grocery_list_items` (`nameNormalized`)"
@@ -229,7 +223,6 @@ public abstract class AppDatabase extends RoomDatabase {
         @Override
         public void migrate(SupportSQLiteDatabase db) {
 
-            // Rebuild table with CHECK constraints for name/nameNormalized length
             db.execSQL(
                     "CREATE TABLE IF NOT EXISTS `grocery_list_items_new` (" +
                             "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
@@ -248,7 +241,6 @@ public abstract class AppDatabase extends RoomDatabase {
                             ")"
             );
 
-            // Copy existing rows; truncate any over-limit names to avoid migration failure
             db.execSQL(
                     "INSERT INTO `grocery_list_items_new` " +
                             "(`id`, `name`, `nameNormalized`, `storeId`, `addedAt`, `quantity`, `unit`, `priceCents`, `isCompleted`) " +
@@ -268,7 +260,6 @@ public abstract class AppDatabase extends RoomDatabase {
             db.execSQL("DROP TABLE `grocery_list_items`");
             db.execSQL("ALTER TABLE `grocery_list_items_new` RENAME TO `grocery_list_items`");
 
-            // Recreate indexes required by @Entity(indices=...)
             db.execSQL(
                     "CREATE INDEX IF NOT EXISTS `index_grocery_list_items_nameNormalized` " +
                             "ON `grocery_list_items` (`nameNormalized`)"
@@ -276,6 +267,17 @@ public abstract class AppDatabase extends RoomDatabase {
             db.execSQL(
                     "CREATE INDEX IF NOT EXISTS `index_grocery_list_items_storeId` " +
                             "ON `grocery_list_items` (`storeId`)"
+            );
+        }
+    };
+
+    // ✅ 12 → 13 : grocery_list_items.buyQuantity
+    public static final Migration MIGRATION_12_13 = new Migration(12, 13) {
+        @Override
+        public void migrate(SupportSQLiteDatabase db) {
+            db.execSQL(
+                    "ALTER TABLE `grocery_list_items` " +
+                            "ADD COLUMN `buyQuantity` INTEGER NOT NULL DEFAULT 1"
             );
         }
     };
