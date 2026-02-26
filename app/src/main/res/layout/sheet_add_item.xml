@@ -234,25 +234,57 @@
         </LinearLayout>
 
         <!-- Hidden New Store Fields -->
-        <EditText
-            android:id="@+id/etStoreName"
+        <LinearLayout
+            android:id="@+id/newStoreFields"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Store name"
-            android:inputType="textPersonName"
-            android:padding="12dp"
-            android:layout_marginTop="12dp"
-            android:visibility="gone"/>
+            android:orientation="vertical"
+            android:layout_marginTop="16dp"
+            android:visibility="gone">
 
-        <EditText
-            android:id="@+id/etStoreLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Location (optional)"
-            android:inputType="textPersonName"
-            android:padding="12dp"
-            android:layout_marginTop="12dp"
-            android:visibility="gone"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="STORE NAME"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/sheet_label_text"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="4dp"/>
+
+            <EditText
+                android:id="@+id/etStoreName"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_outline_box"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:gravity="center_vertical"
+                android:hint="Store name"
+                android:inputType="textPersonName"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LOCATION (OPTIONAL)"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/sheet_label_text"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="4dp"/>
+
+            <EditText
+                android:id="@+id/etStoreLocation"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_outline_box"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:gravity="center_vertical"
+                android:hint="Location (optional)"
+                android:inputType="textPersonName"/>
+        </LinearLayout>
 
         <!-- Actions -->
         <LinearLayout

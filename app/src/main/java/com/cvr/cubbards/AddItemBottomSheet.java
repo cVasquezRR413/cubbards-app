@@ -126,6 +126,13 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         return v;
     }
 
+    // ✅ ADDED: keeps visibility logic in one place
+    private void syncNewStoreVisibility(Spinner spStore, View newStoreFields) {
+        int pos = spStore.getSelectedItemPosition();
+        boolean isNew = (pos == 1);
+        newStoreFields.setVisibility(isNew ? View.VISIBLE : View.GONE);
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -163,8 +170,11 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         EditText etPrice = view.findViewById(R.id.etPrice);
         Spinner spUnit = view.findViewById(R.id.spUnit);
         Spinner spStore = view.findViewById(R.id.spStore);
+
         EditText etStoreName = view.findViewById(R.id.etStoreName);
         EditText etStoreLocation = view.findViewById(R.id.etStoreLocation);
+        View newStoreFields = view.findViewById(R.id.newStoreFields); // ✅ ADDED
+
         Button btnCancel = view.findViewById(R.id.btnCancel);
         Button btnSave = view.findViewById(R.id.btnSave);
 
@@ -262,8 +272,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         spStore.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
                 boolean isNew = (position == 1);
-                etStoreName.setVisibility(isNew ? View.VISIBLE : View.GONE);
-                etStoreLocation.setVisibility(isNew ? View.VISIBLE : View.GONE);
+                newStoreFields.setVisibility(isNew ? View.VISIBLE : View.GONE); // ✅ UPDATED
             }
             @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
@@ -300,6 +309,9 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                         }
                     }
                 }
+
+                // ✅ ADDED: ensure wrapper visibility matches selection after async load
+                syncNewStoreVisibility(spStore, newStoreFields);
             });
         }).start();
 
