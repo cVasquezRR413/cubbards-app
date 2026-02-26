@@ -1,273 +1,281 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:fillViewport="true"
+    android:clipToPadding="false">
 
-    <!-- NAME -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="NAME"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:textColor="@color/sheet_label_text"
-            android:layout_marginStart="4dp"
-            android:layout_marginBottom="4dp"/>
-
-        <EditText
-            android:id="@+id/etName"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@drawable/bg_outline_box"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:gravity="center_vertical"
-            android:inputType="textPersonName"
-            android:maxLength="60"
-            android:hint="Flour"/>
-    </LinearLayout>
-
-    <!-- MEASURE + AMT row -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="16dp">
-
-        <!-- MEASURE -->
+        <!-- NAME -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="MEASURE"
+                android:text="NAME"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:textColor="@color/sheet_label_text"
                 android:layout_marginStart="4dp"
                 android:layout_marginBottom="4dp"/>
 
-            <!-- 30/70 split: quantity (30%) + unit (70%) -->
+            <EditText
+                android:id="@+id/etName"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_outline_box"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:gravity="center_vertical"
+                android:inputType="textPersonName"
+                android:maxLength="60"
+                android:hint="Flour"/>
+        </LinearLayout>
+
+        <!-- MEASURE + AMT row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <!-- MEASURE -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MEASURE"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/sheet_label_text"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginBottom="4dp"/>
+
+                <!-- 30/70 split: quantity (30%) + unit (70%) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_outline_box"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="8dp">
+
+                    <EditText
+                        android:id="@+id/etQuantity"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="3"
+                        android:background="@android:color/transparent"
+                        android:hint="80"
+                        android:inputType="numberDecimal"
+                        android:textSize="16sp"
+                        android:padding="0dp"/>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@color/sheet_divider"/>
+
+                    <Spinner
+                        android:id="@+id/spUnit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="7"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="0dp"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- AMT -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="AMT"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/sheet_label_text"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginBottom="4dp"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_outline_box"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp">
+
+                    <!-- SWAPPED: MINUS on left -->
+                    <TextView
+                        android:id="@+id/btnAmtMinus"
+                        android:layout_width="48dp"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_small_square_outline"
+                        android:gravity="center"
+                        android:text="−"
+                        android:textColor="@color/sheet_label_text"
+                        android:textSize="18sp"/>
+
+                    <!-- value stays in middle -->
+                    <EditText
+                        android:id="@+id/tvAmtValue"
+                        android:layout_width="52dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="1"
+                        android:textSize="16sp"
+                        android:inputType="number"
+                        android:maxLength="3"
+                        android:imeOptions="actionDone"
+                        android:background="@android:color/transparent"
+                        android:padding="0dp" />
+
+                    <!-- SWAPPED: PLUS on right -->
+                    <TextView
+                        android:id="@+id/btnAmtPlus"
+                        android:layout_width="48dp"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_small_square_outline"
+                        android:gravity="center"
+                        android:text="+"
+                        android:textColor="@color/sheet_label_text"
+                        android:textSize="18sp"/>
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- PRICE -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PRICE"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/sheet_label_text"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="4dp"/>
+
+            <EditText
+                android:id="@+id/etPrice"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_outline_box"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:gravity="center_vertical"
+                android:inputType="numberDecimal"
+                android:maxLength="7"
+                android:hint="$4.00"/>
+        </LinearLayout>
+
+        <!-- STORE -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="STORE"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/sheet_label_text"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="4dp"/>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
+                android:layout_marginTop="0dp"
                 android:background="@drawable/bg_outline_box"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:paddingStart="12dp"
-                android:paddingEnd="8dp">
-
-                <EditText
-                    android:id="@+id/etQuantity"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="3"
-                    android:background="@android:color/transparent"
-                    android:hint="80"
-                    android:inputType="numberDecimal"
-                    android:textSize="16sp"
-                    android:padding="0dp"/>
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="24dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@color/sheet_divider"/>
+                android:paddingEnd="12dp">
 
                 <Spinner
-                    android:id="@+id/spUnit"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="7"
-                    android:paddingStart="0dp"
-                    android:paddingEnd="0dp"/>
+                    android:id="@+id/spStore"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
             </LinearLayout>
         </LinearLayout>
 
-        <!-- AMT -->
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <!-- Hidden New Store Fields -->
+        <EditText
+            android:id="@+id/etStoreName"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="AMT"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textColor="@color/sheet_label_text"
-                android:layout_marginStart="4dp"
-                android:layout_marginBottom="4dp"/>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:background="@drawable/bg_outline_box"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingStart="0dp"
-                android:paddingEnd="0dp">
-
-                <!-- SWAPPED: MINUS on left -->
-                <TextView
-                    android:id="@+id/btnAmtMinus"
-                    android:layout_width="48dp"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/bg_small_square_outline"
-                    android:gravity="center"
-                    android:text="−"
-                    android:textColor="@color/sheet_label_text"
-                    android:textSize="18sp"/>
-
-                <!-- value stays in middle -->
-                <EditText
-                    android:id="@+id/tvAmtValue"
-                    android:layout_width="52dp"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="1"
-                    android:textSize="16sp"
-                    android:inputType="number"
-                    android:maxLength="3"
-                    android:imeOptions="actionDone"
-                    android:background="@android:color/transparent"
-                    android:padding="0dp" />
-
-                <!-- SWAPPED: PLUS on right -->
-                <TextView
-                    android:id="@+id/btnAmtPlus"
-                    android:layout_width="48dp"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/bg_small_square_outline"
-                    android:gravity="center"
-                    android:text="+"
-                    android:textColor="@color/sheet_label_text"
-                    android:textSize="18sp"/>
-            </LinearLayout>
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <!-- PRICE -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="PRICE"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:textColor="@color/sheet_label_text"
-            android:layout_marginStart="4dp"
-            android:layout_marginBottom="4dp"/>
+            android:hint="Store name"
+            android:inputType="textPersonName"
+            android:padding="12dp"
+            android:layout_marginTop="12dp"
+            android:visibility="gone"/>
 
         <EditText
-            android:id="@+id/etPrice"
+            android:id="@+id/etStoreLocation"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@drawable/bg_outline_box"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:gravity="center_vertical"
-            android:inputType="numberDecimal"
-            android:maxLength="7"
-            android:hint="$4.00"/>
-    </LinearLayout>
-
-    <!-- STORE -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="STORE"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:textColor="@color/sheet_label_text"
-            android:layout_marginStart="4dp"
-            android:layout_marginBottom="4dp"/>
+            android:hint="Location (optional)"
+            android:inputType="textPersonName"
+            android:padding="12dp"
+            android:layout_marginTop="12dp"
+            android:visibility="gone"/>
 
+        <!-- Actions -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="0dp"
-            android:background="@drawable/bg_outline_box"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp">
+            android:gravity="end"
+            android:layout_marginTop="20dp">
 
-            <Spinner
-                android:id="@+id/spStore"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+            <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancel"/>
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add"
+                android:layout_marginStart="12dp"/>
         </LinearLayout>
+
     </LinearLayout>
 
-    <!-- Hidden New Store Fields -->
-    <EditText
-        android:id="@+id/etStoreName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Store name"
-        android:inputType="textPersonName"
-        android:padding="12dp"
-        android:layout_marginTop="12dp"
-        android:visibility="gone"/>
-
-    <EditText
-        android:id="@+id/etStoreLocation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Location (optional)"
-        android:inputType="textPersonName"
-        android:padding="12dp"
-        android:layout_marginTop="12dp"
-        android:visibility="gone"/>
-
-    <!-- Actions -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end"
-        android:layout_marginTop="20dp">
-
-        <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Cancel"/>
-
-        <Button
-            android:id="@+id/btnSave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add"
-            android:layout_marginStart="12dp"/>
-    </LinearLayout>
-
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>

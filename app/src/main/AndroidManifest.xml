@@ -13,7 +13,9 @@
         android:theme="@style/Theme.Cubbards">
 
         <!-- NEW: register GroceryListActivity -->
-        <activity android:name=".GroceryListActivity" />
+        <activity
+            android:name=".GroceryListActivity"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".MainActivity"
@@ -23,7 +25,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
 
     </application>
 
