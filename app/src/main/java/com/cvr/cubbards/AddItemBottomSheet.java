@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView; // ✅ ADDED (minimal, for scrolling)
 
 import com.cvr.cubbards.data.AppDatabase;
 import com.cvr.cubbards.data.DatabaseProvider;
@@ -177,6 +178,16 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
 
         Button btnCancel = view.findViewById(R.id.btnCancel);
         Button btnSave = view.findViewById(R.id.btnSave);
+
+        // ✅ ADDED (minimal): scroll focused lower fields into view when keyboard opens
+        NestedScrollView scroll = (NestedScrollView) view;
+        View.OnFocusChangeListener scrollOnFocus = (v, hasFocus) -> {
+            if (!hasFocus) return;
+            v.post(() -> scroll.smoothScrollTo(0, v.getBottom()));
+        };
+        etStoreName.setOnFocusChangeListener(scrollOnFocus);
+        etStoreLocation.setOnFocusChangeListener(scrollOnFocus);
+        // (If PRICE ever gets clipped too, add: etPrice.setOnFocusChangeListener(scrollOnFocus);)
 
         // AMT UI (direct entry + clamp)
         TextView btnAmtPlus = view.findViewById(R.id.btnAmtPlus);

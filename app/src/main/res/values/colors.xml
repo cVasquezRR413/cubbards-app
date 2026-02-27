@@ -9,4 +9,7 @@
     <color name="sheet_field_fill">#00000000</color> <!-- transparent -->
     <color name="sheet_label_text">#4CAF50</color>
     <color name="sheet_divider">#4CAF50</color>
+
+    <!-- NEW: drag handle (subtle gray) -->
+    <color name="sheet_handle">#33000000</color>
 </resources>
