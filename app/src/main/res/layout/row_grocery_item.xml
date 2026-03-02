@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@android:color/white">
+        android:background="?attr/colorSurface">
 
         <!-- ROW CONTENT -->
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -61,7 +61,7 @@
                     android:layout_marginTop="2dp"
                     android:layout_marginEnd="2dp"
                     android:src="@drawable/ic_edit"
-                    app:tint="#9E9E9E" />
+                    app:tint="@color/row_icon_tint" />
             </FrameLayout>
 
             <!-- PRICE (very close to edit) -->
@@ -70,7 +70,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="15sp"
-                android:textColor="#777777"
+                android:textColor="@color/row_text_secondary"
                 android:maxLines="1"
                 android:gravity="end"
                 android:layout_marginEnd="2dp"
@@ -92,7 +92,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
-                android:textColor="#1F1F1F"
+                android:textColor="@color/row_text_primary"
                 android:maxLines="3"
                 android:maxLength="100"
                 android:ellipsize="end"
@@ -107,7 +107,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:textSize="13sp"
-                android:textColor="#777777"
+                android:textColor="@color/row_text_secondary"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="@id/tvName"
                 app:layout_constraintEnd_toEndOf="@id/tvName"
@@ -119,7 +119,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginStart="16dp"
-            android:background="#E0E0E0"/>
+            android:background="@color/row_divider"/>
     </LinearLayout>
 
 </FrameLayout>

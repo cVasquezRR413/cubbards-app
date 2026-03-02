@@ -1,6 +1,5 @@
 package com.cvr.cubbards;
 
-import android.graphics.Color; // ✅ added
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -12,6 +11,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cvr.cubbards.data.GroceryRow;
@@ -58,12 +58,6 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     // Swipe reveal state
     private int openedPos = RecyclerView.NO_POSITION;
     private float revealWidthPx = 0f;
-
-    // ✅ added (matches your XML defaults)
-    private static final int COLOR_NAME_NORMAL = Color.parseColor("#1F1F1F");
-    private static final int COLOR_NAME_COMPLETED = Color.parseColor("#9E9E9E");
-    private static final int COLOR_PRICE_NORMAL = Color.parseColor("#777777");
-    private static final int COLOR_PRICE_COMPLETED = Color.parseColor("#B0B0B0");
 
     public GroceryListAdapter(Listener listener) {
         this.listener = listener;
@@ -159,13 +153,19 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         vh.tvName.setText(ss);
 
-        // ✅ added: grey out top line when completed (name + "(N)" prefix + price)
+        // ✅ FIX: use day/night-aware resource colors (don’t hardcode)
+        final int primary = ContextCompat.getColor(vh.itemView.getContext(), R.color.row_text_primary);
+        final int secondary = ContextCompat.getColor(vh.itemView.getContext(), R.color.row_text_secondary);
+
+        // Always set to avoid recycled “wrong color”
+        vh.tvDetails.setTextColor(secondary);
+
         if (row.isCompleted) {
-            vh.tvName.setTextColor(COLOR_NAME_COMPLETED);
-            vh.tvPrice.setTextColor(COLOR_PRICE_COMPLETED);
+            vh.tvName.setTextColor(secondary);
+            vh.tvPrice.setTextColor(secondary);
         } else {
-            vh.tvName.setTextColor(COLOR_NAME_NORMAL);
-            vh.tvPrice.setTextColor(COLOR_PRICE_NORMAL);
+            vh.tvName.setTextColor(primary);
+            vh.tvPrice.setTextColor(secondary);
         }
 
         // --- Price ---

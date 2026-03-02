@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Grocery List title (night mode) -->
+    <color name="grocery_title">#FFFFFFFF</color>
+
+    <!-- Row colors (night mode) -->
+    <color name="row_surface">#1E1E1E</color>
+    <color name="row_text_primary">#E6E6E6</color>
+    <color name="row_text_secondary">#B3B3B3</color>
+    <color name="row_divider">#2E2E2E</color>
+    <color name="row_icon_tint">#B3B3B3</color>
+
+    <!-- Bottom sheet drag handle (night mode) -->
+    <color name="sheet_handle">#BDBDBD</color>
+
+</resources>

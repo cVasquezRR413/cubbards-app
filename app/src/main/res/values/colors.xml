@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="fab_green">#53AF3F</color>
+
+    <!-- Grocery List title (light mode) -->
+    <color name="grocery_title">#FF000000</color>
 
     <!-- Bottom sheet theme colors -->
     <color name="sheet_field_stroke">#4CAF50</color>
@@ -10,6 +14,14 @@
     <color name="sheet_label_text">#4CAF50</color>
     <color name="sheet_divider">#4CAF50</color>
 
-    <!-- NEW: drag handle (subtle gray) -->
+    <!-- Drag handle (subtle gray for light mode) -->
     <color name="sheet_handle">#33000000</color>
+
+    <!-- Row colors (light mode) -->
+    <color name="row_surface">#FFFFFFFF</color>
+    <color name="row_text_primary">#1F1F1F</color>
+    <color name="row_text_secondary">#777777</color>
+    <color name="row_divider">#E0E0E0</color>
+    <color name="row_icon_tint">#9E9E9E</color>
+
 </resources>
