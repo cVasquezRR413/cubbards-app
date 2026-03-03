@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:text="Grocery List"
         android:textColor="@color/grocery_title"
-        android:textSize="18sp"
+        android:textSize="28sp"
         android:textStyle="bold"
         android:padding="16dp"
         app:layout_constraintTop_toTopOf="parent"
