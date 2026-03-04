@@ -28,13 +28,13 @@ public class PantryItem {
 
     public String unit;
 
-    // NEW: expiry timestamp (epoch millis). Nullable means "no expiry tracked".
+    // Expiry timestamp (epoch millis); null means no expiry tracked.
     public Long expiresAt;
 
     public PantryItem(long ingredientId, double quantity, String unit) {
         this.ingredientId = ingredientId;
         this.quantity = quantity;
         this.unit = unit;
-        this.expiresAt = null; // default
+        this.expiresAt = null;
     }
 }

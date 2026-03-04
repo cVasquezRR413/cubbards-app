@@ -26,8 +26,6 @@ public interface IngredientDao {
     @Query("SELECT * FROM ingredients WHERE ingredientId = :id LIMIT 1")
     Ingredient getById(long id);
 
-    // --- Milestone 3: Frequently Replaced ---
-
     @Query("UPDATE ingredients SET isFrequent = :isFrequent WHERE ingredientId = :ingredientId")
     int setFrequent(long ingredientId, boolean isFrequent);
 

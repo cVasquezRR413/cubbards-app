@@ -151,7 +151,7 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
-    // 8 → 9 : DECOUPLE grocery list from ingredients (table rebuild required)
+    // 8 → 9 : decouple grocery list from ingredients (table rebuild required)
     public static final Migration MIGRATION_8_9 = new Migration(8, 9) {
         @Override
         public void migrate(SupportSQLiteDatabase db) {
@@ -271,7 +271,7 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
-    // ✅ 12 → 13 : grocery_list_items.buyQuantity
+    // 12 → 13 : grocery_list_items.buyQuantity
     public static final Migration MIGRATION_12_13 = new Migration(12, 13) {
         @Override
         public void migrate(SupportSQLiteDatabase db) {

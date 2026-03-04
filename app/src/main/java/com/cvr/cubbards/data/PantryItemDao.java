@@ -36,7 +36,7 @@ public interface PantryItemDao {
     )
     List<PantryRow> getPantryRows();
 
-    // Milestone 3: "Low" items (hardcoded threshold for now)
+    // "Low" items (hardcoded threshold for now)
     @Query(
             "SELECT pi.id AS pantryItemId, " +
                     "pi.ingredientId AS ingredientId, " +
@@ -50,7 +50,7 @@ public interface PantryItemDao {
     )
     List<PantryRow> getLowItems();
 
-    // Milestone 3: "Expiring soon" (within cutoffMillis)
+    // "Expiring soon" (within cutoffMillis)
     @Query(
             "SELECT pi.id AS pantryItemId, " +
                     "pi.ingredientId AS ingredientId, " +
@@ -64,7 +64,7 @@ public interface PantryItemDao {
     )
     List<PantryRow> getExpiringSoon(long cutoffMillis);
 
-    // Milestone 3: "Frequently replaced" (manual pin via Ingredient.isFrequent)
+    // "Frequently replaced" (manual pin via Ingredient.isFrequent)
     @Query(
             "SELECT pi.id AS pantryItemId, " +
                     "pi.ingredientId AS ingredientId, " +

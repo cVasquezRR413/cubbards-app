@@ -8,7 +8,6 @@
     android:paddingTop="14dp"
     android:paddingBottom="6dp">
 
-    <!-- Store name chip -->
     <TextView
         android:id="@+id/tvStoreChip"
         android:layout_width="wrap_content"
@@ -23,7 +22,6 @@
         android:textColor="@android:color/white"
         android:background="@drawable/bg_store_chip" />
 
-    <!-- Optional store location -->
     <TextView
         android:id="@+id/tvStoreLocation"
         android:layout_width="wrap_content"

@@ -5,9 +5,9 @@
         <item>oz</item>
         <item>lb</item>
         <item>g</item>
-        <item>bags</item>
-        <item>boxes</item>
-        <item>cans</item>
-        <item>bottles</item>
+        <item>fl oz</item>
+        <item>pt</item>
+        <item>qt</item>
+        <item>gal</item>
     </string-array>
 </resources>

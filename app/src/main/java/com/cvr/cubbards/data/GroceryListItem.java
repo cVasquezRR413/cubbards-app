@@ -28,21 +28,17 @@ public class GroceryListItem {
     @PrimaryKey(autoGenerate = true)
     public long id;
 
-    // Grocery owns its own name
     public String name;
     public String nameNormalized;
 
-    // Optional store link
     public Long storeId;
 
     public long addedAt;
 
-    // Unit-size / details line (e.g., 80 oz, 1 boxes)
     public double quantity;
     public String unit;
 
-    // ✅ NEW: how many the user plans to buy (for "(2) Almond milk")
-    // Default to 1 so new inserts behave correctly even before the UI edits this.
+    // How many to buy (e.g. "(2) Almond milk"); defaults to 1
     public int buyQuantity = 1;
 
     // Optional price (stored as cents)
@@ -51,7 +47,6 @@ public class GroceryListItem {
 
     public boolean isCompleted;
 
-    // Primary constructor
     public GroceryListItem(String name,
                            String nameNormalized,
                            Long storeId,
@@ -66,7 +61,6 @@ public class GroceryListItem {
         this.quantity = quantity;
         this.unit = unit;
         this.priceCents = priceCents;
-        // buyQuantity keeps its default unless explicitly set
     }
 
     // Convenience constructor (no store)

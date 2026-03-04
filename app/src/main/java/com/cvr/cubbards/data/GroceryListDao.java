@@ -28,7 +28,7 @@ public interface GroceryListDao {
                     "nameNormalized = :nameNormalized, " +
                     "quantity = :quantity, " +
                     "unit = :unit, " +
-                    "buyQuantity = :buyQuantity, " +   // ✅ added
+                    "buyQuantity = :buyQuantity, " +
                     "priceCents = :priceCents, " +
                     "storeId = :storeId " +
                     "WHERE id = :groceryItemId"
@@ -38,7 +38,7 @@ public interface GroceryListDao {
                    String nameNormalized,
                    double quantity,
                    String unit,
-                   int buyQuantity,              // ✅ added
+                   int buyQuantity,
                    Integer priceCents,
                    Long storeId);
 
@@ -51,7 +51,7 @@ public interface GroceryListDao {
                     "gli.addedAt AS addedAt, " +
                     "gli.quantity AS quantity, " +
                     "gli.unit AS unit, " +
-                    "gli.buyQuantity AS buyQuantity, " +   // ✅ added
+                    "gli.buyQuantity AS buyQuantity, " +
                     "gli.priceCents AS priceCents, " +
                     "gli.storeId AS storeId, " +
                     "s.name AS storeName, " +

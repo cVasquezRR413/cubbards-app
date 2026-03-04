@@ -26,11 +26,9 @@ public interface StoreDao {
     @Query("SELECT * FROM stores WHERE storeId = :id LIMIT 1")
     Store getById(long id);
 
-    // Existing behavior (still useful)
     @Query("SELECT * FROM stores WHERE name = :name AND location IS NULL LIMIT 1")
     Store getByName(String name);
 
-    // NEW: correct lookup when location exists
     @Query(
             "SELECT * FROM stores " +
                     "WHERE name = :name AND " +

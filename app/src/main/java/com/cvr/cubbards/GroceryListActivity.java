@@ -79,7 +79,6 @@ public class GroceryListActivity extends AppCompatActivity {
                 Log.d(TAG, "EDIT clicked: " + row.name
                         + " groceryItemId=" + row.groceryItemId);
 
-                // NEW: open bottom sheet in edit mode (prefilled)
                 AddItemBottomSheet sheet = AddItemBottomSheet.newEditInstance(row);
                 sheet.show(getSupportFragmentManager(), "EditItemBottomSheet");
             }
@@ -182,6 +181,7 @@ public class GroceryListActivity extends AppCompatActivity {
                         return false;
                     }
 
+                    // Disable fling-to-dismiss, treat this purely as a drag reveal
                     @Override
                     public float getSwipeThreshold(RecyclerView.ViewHolder viewHolder) {
                         return 10f;
@@ -351,6 +351,8 @@ public class GroceryListActivity extends AppCompatActivity {
 
                     String headerLocation = null;
                     if (row.storeName != null && !row.storeName.trim().isEmpty()) {
+
+                        // Only show location in header when multiple stores share the same name
                         int count = nameCounts.getOrDefault(row.storeName.trim(), 0);
                         if (count > 1 && row.storeLocation != null && !row.storeLocation.trim().isEmpty()) {
                             headerLocation = row.storeLocation.trim();

@@ -19,8 +19,30 @@ import com.cvr.cubbards.data.GroceryRow;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * RecyclerView adapter for the grocery list screen.
+ *
+ * This adapter renders a "sectioned" list:
+ * - Store header rows (store name + optional location)
+ * - Grocery item rows (name, quantity/unit details, optional price)
+ *
+ * Design boundary:
+ * The adapter does not modify data; it delegates actions via Listener callbacks.
+ *
+ * RecyclerView note:
+ * Because views are recycled, every bind path must fully reset view state
+ * (text, visibility, translation, colors) to avoid stale UI.
+ */
 public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    /**
+     * UI events emitted from the adapter.
+     *
+     * Contract:
+     * - Taps on an opened row close the swipe reveal.
+     * - Taps on a closed row toggle completion.
+     * - Edit/Delete are explicit button actions.
+     */
     public interface Listener {
         void onItemClicked(GroceryRow row);      // close if open
         void onToggleCompleted(GroceryRow row);  // toggle completion if closed
@@ -28,9 +50,13 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         void onEditClicked(GroceryRow row);
     }
 
-    // ---- UI Row model (headers + items) ----
+    /**
+     * UI row model used by the adapter.
+     * We keep headers and items in a single list so RecyclerView can render them in order.
+     */
     public interface UiRow {}
 
+    /** Header row that represents a store grouping. Fields may be null when not present. */
     public static class StoreHeaderRow implements UiRow {
         public final String storeName;       // nullable
         public final String storeLocation;   // nullable
@@ -41,6 +67,7 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
+    /** Wrapper for a grocery item row. */
     public static class ItemRow implements UiRow {
         public final GroceryRow row;
 
@@ -49,13 +76,18 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
+    // View types for header vs item rows.
     private static final int VT_HEADER = 0;
     private static final int VT_ITEM = 1;
 
     private final Listener listener;
     private final List<UiRow> rows = new ArrayList<>();
 
-    // Swipe reveal state
+    /**
+     * Swipe-reveal state.
+     * openedPos tracks the *single* currently revealed row (adapter position).
+     * revealWidthPx is injected by the parent based on measured layout width.
+     */
     private int openedPos = RecyclerView.NO_POSITION;
     private float revealWidthPx = 0f;
 
@@ -63,29 +95,38 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         this.listener = listener;
     }
 
-    // Activity expects this name
+    /** Parent provides the width to translate the foreground when the row is revealed. */
     public void setRevealWidthPx(float px) {
         this.revealWidthPx = px;
     }
 
-    // Activity expects this
+    /**
+     * Full refresh is intentional to keep swipe-reveal state consistent
+     * and avoid RecyclerView animation edge cases.
+     */
     public void setOpenedPos(int pos) {
         this.openedPos = pos;
         notifyDataSetChanged();
     }
 
-    // Activity expects this
+    /** Exposed for swipe helpers to read current reveal state. */
     public int getOpenedPos() {
         return openedPos;
     }
 
-    // Activity swipe code calls this
+    /**
+     * Safe lookup used by swipe helpers.
+     * Returns null when the adapter position is invalid (data changed mid-gesture).
+     */
     public UiRow getUiRow(int adapterPos) {
         if (adapterPos < 0 || adapterPos >= rows.size()) return null;
         return rows.get(adapterPos);
     }
 
-    // Activity refresh uses this
+    /**
+     * Replaces adapter data.
+     * If the previously opened position is now out of range, we clear the reveal state.
+     */
     public void setRows(List<UiRow> newRows) {
         rows.clear();
         if (newRows != null) rows.addAll(newRows);
@@ -128,7 +169,11 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         ItemVH vh = (ItemVH) holder;
         GroceryRow row = ((ItemRow) r).row;
 
-        // --- Name (now includes "(N) " inline so wrapping looks natural) ---
+        /**
+         * Name formatting:
+         * We inline the buy-quantity prefix as "(N) " so text wrapping behaves naturally.
+         * Strike-through is applied to the *name only* (not the prefix) to keep quantity legible.
+         */
         int buyQty = row.buyQuantity;
         String prefix = (buyQty > 1) ? "(" + buyQty + ") " : "";
         String name = (row.name == null) ? "" : row.name;
@@ -136,16 +181,19 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         SpannableString ss = new SpannableString(full);
 
-        // --- Completed UI (strike-through NAME only, not prefix) ---
+        // Completed styling: strike-through only the name portion.
         if (row.isCompleted) {
             int startName = prefix.length();
             int endName = full.length();
             if (endName > startName) {
                 ss.setSpan(new StrikethroughSpan(), startName, endName, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
+
+            // Completed rows collapse to one line to reduce visual noise in "done" items.
             vh.tvName.setSingleLine(true);
             vh.tvName.setEllipsize(TextUtils.TruncateAt.END);
         } else {
+            // Active rows can wrap for readability.
             vh.tvName.setSingleLine(false);
             vh.tvName.setEllipsize(null);
             vh.tvName.setMaxLines(3);
@@ -153,11 +201,14 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         vh.tvName.setText(ss);
 
-        // ✅ FIX: use day/night-aware resource colors (don’t hardcode)
+        /**
+         * Color handling:
+         * Always set colors during bind to prevent recycled rows from "leaking" old colors.
+         */
         final int primary = ContextCompat.getColor(vh.itemView.getContext(), R.color.row_text_primary);
         final int secondary = ContextCompat.getColor(vh.itemView.getContext(), R.color.row_text_secondary);
 
-        // Always set to avoid recycled “wrong color”
+        // Details are always secondary (even when active).
         vh.tvDetails.setTextColor(secondary);
 
         if (row.isCompleted) {
@@ -168,7 +219,11 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             vh.tvPrice.setTextColor(secondary);
         }
 
-        // --- Price ---
+        /**
+         * Price:
+         * When missing, clear text to avoid recycled stale values.
+         * Use INVISIBLE (not GONE) so the row layout doesn't "jump" between items.
+         */
         if (row.priceCents != null) {
             int abs = Math.abs(row.priceCents);
             int dollars = abs / 100;
@@ -180,11 +235,15 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             vh.tvPrice.setText(price);
             vh.tvPrice.setVisibility(View.VISIBLE);
         } else {
-            vh.tvPrice.setText(""); // avoid stale recycled value
-            vh.tvPrice.setVisibility(View.INVISIBLE); // IMPORTANT: keep layout space reserved
+            vh.tvPrice.setText("");
+            vh.tvPrice.setVisibility(View.INVISIBLE);
         }
 
-        // --- Details ---
+        /**
+         * Details (quantity + unit):
+         * Hide completely when empty (GONE) since details are optional and should not reserve space.
+         * Clear text on the empty path to avoid recycled values.
+         */
         String details = "";
         if (row.quantity > 0) {
             String q = (row.quantity == Math.rint(row.quantity))
@@ -202,27 +261,36 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             vh.tvDetails.setText(details);
             vh.tvDetails.setVisibility(View.VISIBLE);
         } else {
-            vh.tvDetails.setText(""); // avoid stale recycled value
+            vh.tvDetails.setText("");
             vh.tvDetails.setVisibility(View.GONE);
         }
 
-        // --- Swipe reveal persistence (items only) ---
+        /**
+         * Swipe reveal persistence:
+         * We translate the foreground view so only one row stays "open" at a time.
+         * Must reset translation on all other rows due to RecyclerView recycling.
+         */
         if (position == openedPos) {
             vh.itemForeground.setTranslationX(-revealWidthPx);
         } else {
             vh.itemForeground.setTranslationX(0f);
         }
 
-        // --- Clicks ---
+        /**
+         * Click behavior:
+         * - If this row is currently revealed, a tap closes it (delegated to parent).
+         * - Otherwise, a tap toggles completion.
+         */
         vh.itemForeground.setOnClickListener(v -> {
             int pos = vh.getAdapterPosition();
             if (pos != RecyclerView.NO_POSITION && pos == openedPos) {
-                listener.onItemClicked(row); // close reveal
+                listener.onItemClicked(row);
             } else {
                 listener.onToggleCompleted(row);
             }
         });
 
+        // Explicit actions.
         vh.btnDelete.setOnClickListener(v -> listener.onDeleteClicked(row));
         vh.btnEdit.setOnClickListener(v -> listener.onEditClicked(row));
     }
@@ -234,6 +302,7 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     // ---------------- ViewHolders ----------------
 
+    /** ViewHolder for grocery item rows. */
     static class ItemVH extends RecyclerView.ViewHolder {
 
         final TextView tvName;
@@ -254,6 +323,7 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
+    /** ViewHolder for store header rows. */
     static class StoreHeaderVH extends RecyclerView.ViewHolder {
 
         final TextView tvStoreChip;
@@ -265,6 +335,10 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             tvStoreLocation = itemView.findViewById(R.id.tvStoreLocation);
         }
 
+        /**
+         * Binds store grouping UI.
+         * Shows "No store" when items are unassigned to a store.
+         */
         void bind(StoreHeaderRow row) {
             String name = (row.storeName == null || row.storeName.trim().isEmpty())
                     ? "No store"

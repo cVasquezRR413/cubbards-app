@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.widget.NestedScrollView; // ✅ ADDED (minimal, for scrolling)
+import androidx.core.widget.NestedScrollView; // minimal: used to scroll focused fields into view
 
 import com.cvr.cubbards.data.AppDatabase;
 import com.cvr.cubbards.data.DatabaseProvider;
@@ -28,29 +28,45 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Bottom sheet used to add or edit a grocery list item.
+ *
+ * Responsibilities:
+ * - Validate user input (name, quantity/unit, optional price, buyQuantity)
+ * - Resolve store selection (existing store vs create new store)
+ * - Persist changes via Room DAOs off the main thread
+ *
+ * This UI component does not refresh the list directly; it requests a refresh
+ * from the owning Activity after persistence completes.
+ */
 public class AddItemBottomSheet extends BottomSheetDialogFragment {
 
+    // Store spinner sentinel options.
     private static final String STORE_NONE = "(none)";
     private static final String STORE_NEW = "New store…";
 
+    // Basic input constraint.
     private static final int MAX_NAME_LENGTH = 60;
 
-    // AMT constraints (we will use this value as buyQuantity)
+    // Buy-quantity ("AMT") constraints.
     private static final int AMT_MIN = 1;
     private static final int AMT_MAX = 999;
 
+    // Argument keys for edit-mode prefill.
     private static final String ARG_IS_EDIT = "is_edit";
     private static final String ARG_GROCERY_ITEM_ID = "grocery_item_id";
     private static final String ARG_NAME = "name";
     private static final String ARG_QUANTITY = "quantity";
     private static final String ARG_UNIT = "unit";
     private static final String ARG_STORE_ID = "store_id";
-    private static final String ARG_PRICE_CENTS = "price_cents"; // existing
-    private static final String ARG_BUY_QTY = "buy_qty";         // ✅ NEW
+    private static final String ARG_PRICE_CENTS = "price_cents";
+    private static final String ARG_BUY_QTY = "buy_qty";
 
+    // Store spinner backing data (DB stores + sentinel options).
     private List<Store> stores = new ArrayList<>();
     private ArrayAdapter<String> storeAdapter;
 
+    // Edit-mode fields prefilled from arguments.
     private boolean isEdit = false;
     private long editGroceryItemId = -1L;
     private String editName = null;
@@ -58,8 +74,12 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
     private String editUnit = null;
     private Long editStoreId = null;
     @Nullable private Integer editPriceCents = null;
-    private int editBuyQty = AMT_MIN; // ✅ NEW
+    private int editBuyQty = AMT_MIN;
 
+    /**
+     * Constructs an edit-mode instance with fields pre-populated from the selected row.
+     * This keeps the sheet stateless across configuration changes by relying on arguments.
+     */
     public static AddItemBottomSheet newEditInstance(GroceryRow row) {
         AddItemBottomSheet sheet = new AddItemBottomSheet();
         Bundle b = new Bundle();
@@ -70,17 +90,22 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         b.putString(ARG_UNIT, row.unit);
         if (row.storeId != null) b.putLong(ARG_STORE_ID, row.storeId);
 
-        // pass price through so edits don't wipe it
+        // Preserve optional fields so edits don't clear them unintentionally.
         if (row.priceCents != null) b.putInt(ARG_PRICE_CENTS, row.priceCents);
 
-        // ✅ NEW: pass buyQuantity through so AMT prefills on edit
-        // (If older rows somehow come through as 0, clamp later will fix it.)
+        // Pass buyQuantity so the AMT field can be prefilled in edit mode.
         b.putInt(ARG_BUY_QTY, row.buyQuantity);
 
         sheet.setArguments(b);
         return sheet;
     }
 
+    /**
+     * Parses a user-entered price string into integer cents.
+     * Returns null when the field is empty or invalid.
+     *
+     * Accepted formats: "12", "12.", "12.3", "12.34" (0–9999.99).
+     */
     @Nullable
     private Integer parsePriceToCents(@Nullable String raw) {
         if (raw == null) return null;
@@ -121,13 +146,17 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         return dollars * 100 + cents;
     }
 
+    /** Shared clamp helper for bounded integer fields (e.g., AMT). */
     private static int clampInt(int v, int min, int max) {
         if (v < min) return min;
         if (v > max) return max;
         return v;
     }
 
-    // ✅ ADDED: keeps visibility logic in one place
+    /**
+     * Controls visibility of the "new store" form fields based on store spinner selection.
+     * Centralizing this avoids duplicated position checks scattered across the class.
+     */
     private void syncNewStoreVisibility(Spinner spStore, View newStoreFields) {
         int pos = spStore.getSelectedItemPosition();
         boolean isNew = (pos == 1);
@@ -147,6 +176,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Read arguments once and cache values for prefill logic.
         Bundle args = getArguments();
         isEdit = args != null && args.getBoolean(ARG_IS_EDIT, false);
 
@@ -174,12 +204,12 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
 
         EditText etStoreName = view.findViewById(R.id.etStoreName);
         EditText etStoreLocation = view.findViewById(R.id.etStoreLocation);
-        View newStoreFields = view.findViewById(R.id.newStoreFields); // ✅ ADDED
+        View newStoreFields = view.findViewById(R.id.newStoreFields);
 
         Button btnCancel = view.findViewById(R.id.btnCancel);
         Button btnSave = view.findViewById(R.id.btnSave);
 
-        // ✅ ADDED (minimal): scroll focused lower fields into view when keyboard opens
+        // When the keyboard opens, keep lower input fields visible by scrolling them into view.
         NestedScrollView scroll = (NestedScrollView) view;
         View.OnFocusChangeListener scrollOnFocus = (v, hasFocus) -> {
             if (!hasFocus) return;
@@ -187,13 +217,13 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         };
         etStoreName.setOnFocusChangeListener(scrollOnFocus);
         etStoreLocation.setOnFocusChangeListener(scrollOnFocus);
-        // (If PRICE ever gets clipped too, add: etPrice.setOnFocusChangeListener(scrollOnFocus);)
 
-        // AMT UI (direct entry + clamp)
+        // AMT UI: direct entry with clamping, plus/minus controls.
         TextView btnAmtPlus = view.findViewById(R.id.btnAmtPlus);
         TextView btnAmtMinus = view.findViewById(R.id.btnAmtMinus);
         EditText etAmtValue = view.findViewById(R.id.tvAmtValue);
 
+        // Normalizes AMT field to a valid integer within [AMT_MIN, AMT_MAX].
         Runnable clampAmt = () -> {
             String s = etAmtValue.getText() == null ? "" : etAmtValue.getText().toString().trim();
             if (s.isEmpty()) {
@@ -210,13 +240,13 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             }
         };
 
-        // Prefill AMT when editing (buyQuantity)
+        // Prefill AMT when editing.
         if (isEdit) {
             int prefill = clampInt(editBuyQty, AMT_MIN, AMT_MAX);
             etAmtValue.setText(String.valueOf(prefill));
         }
 
-        // Ensure initial is valid
+        // Ensure initial AMT value is valid before user interactions.
         clampAmt.run();
 
         btnAmtPlus.setOnClickListener(v -> {
@@ -235,7 +265,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             }
         });
 
-        // Clamp when user leaves the field
+        // Clamp when the user leaves the field to avoid persisting invalid values.
         etAmtValue.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) clampAmt.run();
         });
@@ -244,7 +274,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             if (editName != null) etName.setText(editName);
             if (editQty > 0) etQuantity.setText(String.valueOf(editQty));
 
-            // Prefill price so edits don't wipe it
+            // Prefill price so edits don't clear an existing value.
             if (editPriceCents != null) {
                 int abs = Math.abs(editPriceCents);
                 int dollars = abs / 100;
@@ -254,6 +284,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             }
         }
 
+        // Unit spinner is sourced from a fixed resource list.
         ArrayAdapter<CharSequence> unitAdapter =
                 ArrayAdapter.createFromResource(
                         requireContext(),
@@ -263,6 +294,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         unitAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spUnit.setAdapter(unitAdapter);
 
+        // Restore unit selection when editing.
         if (isEdit && editUnit != null) {
             for (int i = 0; i < unitAdapter.getCount(); i++) {
                 if (editUnit.equalsIgnoreCase(unitAdapter.getItem(i).toString())) {
@@ -272,6 +304,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             }
         }
 
+        // Store spinner labels are built from DB stores plus sentinel options at the top.
         storeAdapter = new ArrayAdapter<>(
                 requireContext(),
                 android.R.layout.simple_spinner_item,
@@ -280,14 +313,16 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
         storeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spStore.setAdapter(storeAdapter);
 
+        // Keep "new store" fields in sync as the user changes store selection.
         spStore.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
                 boolean isNew = (position == 1);
-                newStoreFields.setVisibility(isNew ? View.VISIBLE : View.GONE); // ✅ UPDATED
+                newStoreFields.setVisibility(isNew ? View.VISIBLE : View.GONE);
             }
             @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        // Load stores asynchronously to avoid blocking the UI thread.
         new Thread(() -> {
             AppDatabase db = DatabaseProvider.getDatabase(requireContext());
             StoreDao storeDao = db.storeDao();
@@ -296,6 +331,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             requireActivity().runOnUiThread(() -> {
                 stores = dbStores == null ? new ArrayList<>() : dbStores;
 
+                // Spinner order matters: positions 0 and 1 are reserved sentinel options.
                 List<String> labels = new ArrayList<>();
                 labels.add(STORE_NONE);
                 labels.add(STORE_NEW);
@@ -312,6 +348,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                 storeAdapter.addAll(labels);
                 storeAdapter.notifyDataSetChanged();
 
+                // Restore store selection when editing (offset by sentinel options).
                 if (isEdit && editStoreId != null) {
                     for (int i = 0; i < stores.size(); i++) {
                         if (stores.get(i).getStoreId() == editStoreId) {
@@ -321,7 +358,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                     }
                 }
 
-                // ✅ ADDED: ensure wrapper visibility matches selection after async load
+                // Ensure "new store" fields reflect the final selection after async load.
                 syncNewStoreVisibility(spStore, newStoreFields);
             });
         }).start();
@@ -339,6 +376,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                 return;
             }
 
+            // Normalized name supports consistent lookup/sorting while preserving display name.
             String normalized = rawName.toLowerCase().trim();
 
             String qtyRaw = etQuantity.getText() == null ? "" :
@@ -354,7 +392,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                 }
             }
 
-            // Price parsing (optional)
+            // Price is optional. If present, it must parse to cents within the allowed range.
             String priceRaw = etPrice.getText() == null ? "" : etPrice.getText().toString();
             Integer priceCents = parsePriceToCents(priceRaw);
             if (priceRaw != null && !priceRaw.trim().isEmpty() && priceCents == null) {
@@ -371,11 +409,12 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             int storePos = spStore.getSelectedItemPosition();
             final boolean wantsNewStore = (storePos == 1);
 
+            // Map spinner position back to DB store list (offset by sentinel options).
             final Long selectedStoreId =
                     (storePos <= 0 || wantsNewStore) ? null :
                             stores.get(storePos - 2).getStoreId();
 
-            // ✅ buyQuantity comes from AMT field
+            // buyQuantity comes from AMT field and is clamped before persistence.
             clampAmt.run();
             int buyQty;
             try {
@@ -385,6 +424,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
             }
             buyQty = clampInt(buyQty, AMT_MIN, AMT_MAX);
 
+            // Capture values for background thread.
             final String finalName = rawName;
             final String finalNormalized = normalized;
             final double finalQty = qty;
@@ -399,6 +439,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
 
                 Long storeIdToUse = selectedStoreId;
 
+                // If user chose "New store…", create it first and use its generated ID.
                 if (wantsNewStore) {
                     String newName = etStoreName.getText().toString().trim();
                     String newLoc = etStoreLocation.getText().toString().trim();
@@ -408,6 +449,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                     storeIdToUse = storeDao.insert(s);
                 }
 
+                // Update existing item or insert a new one.
                 if (isEdit) {
                     groceryDao.updateItem(
                             editGroceryItemId,
@@ -415,7 +457,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                             finalNormalized,
                             finalQty,
                             finalUnit,
-                            finalBuyQty,      // ✅ NEW PARAM
+                            finalBuyQty,
                             finalPriceCents,
                             storeIdToUse
                     );
@@ -429,7 +471,7 @@ public class AddItemBottomSheet extends BottomSheetDialogFragment {
                             finalUnit,
                             finalPriceCents
                     );
-                    item.buyQuantity = finalBuyQty; // ✅ set on insert
+                    item.buyQuantity = finalBuyQty;
                     groceryDao.insert(item);
                 }
 

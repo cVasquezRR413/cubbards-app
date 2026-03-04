@@ -78,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
 
             ensureMilkIngredientExists(ingredientDao);
 
-            // (your test hook)
             List<Ingredient> all = ingredientDao.getAll();
             for (Ingredient ing : all) {
                 if ("milk".equals(ing.getNameNormalized()) && !ing.isFrequent()) {
@@ -163,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                     System.currentTimeMillis(),
                     0.0,
                     null,
-                    null   // priceCents
+                    null
             ));
 
             Log.d("GROCERY", "Milk inserted rowId=" + result);
@@ -237,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
                                 System.currentTimeMillis(),
                                 0.0,
                                 null,
-                                null   // priceCents
+                                null
                         ));
 
                         Log.d("GROCERY", "Inserted from LOW: " + rawName + " rowId=" + result);
@@ -283,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
                                 System.currentTimeMillis(),
                                 0.0,
                                 null,
-                                null   // priceCents
+                                null
                         ));
 
                         Log.d("GROCERY", "Inserted from EXPIRING: " + rawName + " rowId=" + result);

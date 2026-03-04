@@ -52,7 +52,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Low header -->
     <TextView
         android:id="@+id/tvLowHeader"
         android:layout_width="0dp"
@@ -79,7 +78,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Expiring Soon header -->
     <TextView
         android:id="@+id/tvExpiringHeader"
         android:layout_width="0dp"
@@ -106,7 +104,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Frequently Replaced header -->
     <TextView
         android:id="@+id/tvFrequentHeader"
         android:layout_width="0dp"

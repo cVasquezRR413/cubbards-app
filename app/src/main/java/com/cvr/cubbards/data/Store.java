@@ -12,23 +12,16 @@ public class Store {
 
     private String name;
 
-    // NEW: optional location
     private String location;
 
     private Long createdAt;
 
-    /**
-     * Room constructor (single unambiguous choice).
-     */
     public Store(String name, String location, Long createdAt) {
         this.name = name;
         this.location = location;
         this.createdAt = createdAt;
     }
 
-    /**
-     * Convenience constructor for old call sites.
-     */
     @Ignore
     public Store(String name, Long createdAt) {
         this(name, null, createdAt);
@@ -46,7 +39,6 @@ public class Store {
         return name;
     }
 
-    // ADD: setter so Room / your code can mutate if needed
     public void setName(String name) {
         this.name = name;
     }
@@ -55,7 +47,6 @@ public class Store {
         return location;
     }
 
-    // ADD: setter so Room can populate this field
     public void setLocation(String location) {
         this.location = location;
     }

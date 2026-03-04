@@ -32,7 +32,6 @@
         android:orientation="vertical"
         android:background="?attr/colorSurface">
 
-        <!-- ROW CONTENT -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -42,7 +41,6 @@
             android:paddingTop="8dp"
             android:paddingBottom="8dp">
 
-            <!-- EDIT BUTTON -->
             <FrameLayout
                 android:id="@+id/btnEdit"
                 android:layout_width="48dp"
@@ -64,7 +62,6 @@
                     app:tint="@color/row_icon_tint" />
             </FrameLayout>
 
-            <!-- PRICE (very close to edit) -->
             <TextView
                 android:id="@+id/tvPrice"
                 android:layout_width="wrap_content"
@@ -100,7 +97,6 @@
                 app:layout_constraintEnd_toStartOf="@id/priceGap"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- DETAILS -->
             <TextView
                 android:id="@+id/tvDetails"
                 android:layout_width="0dp"
