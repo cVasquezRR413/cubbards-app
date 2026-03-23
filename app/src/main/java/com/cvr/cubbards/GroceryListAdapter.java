@@ -302,7 +302,6 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     // ---------------- ViewHolders ----------------
 
-    /** ViewHolder for grocery item rows. */
     static class ItemVH extends RecyclerView.ViewHolder {
 
         final TextView tvName;
@@ -323,7 +322,6 @@ public class GroceryListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-    /** ViewHolder for store header rows. */
     static class StoreHeaderVH extends RecyclerView.ViewHolder {
 
         final TextView tvStoreChip;
