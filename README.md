@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo.png" width="130"/>
+  <img src="docs/Cubbards_Logo_2.png" width="130"/>
 </p>
 
 <h1 align="center">Cubbards</h1>
