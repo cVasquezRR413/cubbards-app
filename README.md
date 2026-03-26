@@ -1,4 +1,11 @@
-Cubbards – Pantry-First Grocery Management App
+<p align="center">
+  <img src="docs/logo.png" width="130"/>
+</p>
+
+<h1 align="center">Cubbards</h1>
+<p align="center">
+  Track your pantry, manage grocery lists, and understand price trends — all in one local-first Android app.
+</p>
 
 ## Overview
 
